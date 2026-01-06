@@ -1,15 +1,25 @@
 {
   "manifest_version": 3,
-  "name": "Background Color Changer",
-  "version": "1.0.0",
-  "description": "Simple extension to change the background color of any webpage",
+  "name": "Fragmentum",
+  "version": "2.0.0",
+  "description": "Generate URL fragments from text selections and customize page backgrounds",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "clipboardWrite",
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Change Background Color"
+    "default_title": "Fragmentum"
   },
   "icons": {
     "16": "icon16.png",
