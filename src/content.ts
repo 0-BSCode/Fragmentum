@@ -378,16 +378,45 @@ function generateTextFragment(selection: Selection): string {
 }
 
 /**
- * Normalize text by collapsing whitespace and removing line breaks
+ * Normalize text for consistent fragment matching
+ * - Unicode NFKC normalization (e.g., fancy quotes → regular quotes)
+ * - Remove zero-width characters that may be invisible in selection
+ * - Collapse whitespace and remove line breaks
  */
 function normalizeText(text: string): string {
   return text
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '') // Zero-width chars, BOM, soft hyphen
     .replace(/\s+/g, ' ')
     .trim();
 }
 
 /**
+ * Sanitize context text by removing DOM artifacts and normalizing
+ */
+function sanitizeContextText(text: string): string {
+  return text
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '') // Zero-width chars
+    .replace(/[\x00-\x1F\x7F]/g, '') // Control characters
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Validate that a word is suitable for use in context
+ * Filters out DOM artifacts, very long strings, and non-text content
+ */
+function isValidContextWord(word: string): boolean {
+  if (!word || word.length === 0) return false;
+  if (word.length > 50) return false; // Unusually long "words" are likely artifacts
+  if (/^[\d\W]+$/.test(word) && word.length > 10) return false; // Long non-word strings
+  return true;
+}
+
+/**
  * Extract prefix and suffix context around the selection
+ * Improved to handle DOM edge cases and filter artifacts
  */
 function extractContext(range: Range, prefixWords: number, suffixWords: number): SelectionContext {
   const context: SelectionContext = { prefix: '', suffix: '' };
@@ -399,8 +428,8 @@ function extractContext(range: Range, prefixWords: number, suffixWords: number):
     if (range.startContainer.parentNode) {
       prefixRange.setStart(range.startContainer.parentNode, 0);
     }
-    const prefixText = prefixRange.toString().trim();
-    const prefixWordArray = prefixText.split(/\s+/);
+    const prefixText = sanitizeContextText(prefixRange.toString());
+    const prefixWordArray = prefixText.split(/\s+/).filter(isValidContextWord);
     context.prefix = prefixWordArray.slice(-prefixWords).join(' ');
 
     // Get suffix context
@@ -409,8 +438,8 @@ function extractContext(range: Range, prefixWords: number, suffixWords: number):
     if (range.endContainer.parentNode) {
       suffixRange.setEndAfter(range.endContainer.parentNode);
     }
-    const suffixText = suffixRange.toString().trim();
-    const suffixWordArray = suffixText.split(/\s+/);
+    const suffixText = sanitizeContextText(suffixRange.toString());
+    const suffixWordArray = suffixText.split(/\s+/).filter(isValidContextWord);
     context.suffix = suffixWordArray.slice(0, suffixWords).join(' ');
   } catch (error) {
     console.warn('Could not extract context:', error);
@@ -421,11 +450,14 @@ function extractContext(range: Range, prefixWords: number, suffixWords: number):
 
 /**
  * URL encode fragment component properly
+ * Encodes special characters that have meaning in Text Fragments syntax
+ * and characters that may cause URL parsing issues
  */
 function encodeFragmentComponent(text: string): string {
   return encodeURIComponent(text)
-    .replace(/%20/g, ' ') // Spaces can remain as spaces in fragments
-    .replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+    // Encode characters with special meaning in Text Fragments: - , ` ! ' ( ) *
+    // Also encode / to prevent URL path interpretation issues
+    .replace(/[!'()*\-,`\/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
 }
 
 /**
