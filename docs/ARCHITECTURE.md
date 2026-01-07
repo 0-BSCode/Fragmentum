@@ -265,32 +265,32 @@ content.ts (composition root)
 - [x] Verify TypeScript compilation passes
 
 ### Phase 3: UI Layer
-- [ ] Create `src/ui/button/` directory
-- [ ] Implement `ui/button/button.positioning.ts`
-- [ ] Implement `ui/button/button.component.ts`
-- [ ] Create `src/ui/feedback/` directory
-- [ ] Implement `ui/feedback/feedback.component.ts`
-- [ ] Create `ui/index.ts`
-- [ ] Verify TypeScript compilation passes
+- [x] Create `src/ui/button/` directory
+- [x] Implement `ui/button/button.positioning.ts`
+- [x] Implement `ui/button/button.component.ts`
+- [x] Create `src/ui/feedback/` directory
+- [x] Implement `ui/feedback/feedback.component.ts`
+- [x] Create `ui/index.ts`
+- [x] Verify TypeScript compilation passes
 
 ### Phase 4: Event Layer
-- [ ] Create `src/events/` directory
-- [ ] Implement `events/handlers.ts`
-- [ ] Implement `events/listeners.ts`
-- [ ] Create `events/index.ts`
-- [ ] Verify TypeScript compilation passes
+- [x] Create `src/events/` directory
+- [x] Implement `events/handlers.ts`
+- [x] Implement `events/listeners.ts`
+- [x] Create `events/index.ts`
+- [x] Verify TypeScript compilation passes
 
 ### Phase 5: Composition & Integration
-- [ ] Refactor `content.ts` as composition root
-- [ ] Update `background.ts` with messaging contracts
-- [ ] Update build configuration if needed
-- [ ] Run `pnpm build` successfully
+- [x] Refactor `content.ts` as composition root
+- [x] Update `background.ts` with messaging contracts
+- [x] Update build configuration if needed
+- [x] Run `pnpm build` successfully
 - [ ] Load extension in browser
 - [ ] Test: Select text → button appears
 - [ ] Test: Click button → URL copied
 - [ ] Test: Keyboard shortcut works (Ctrl+Shift+L)
 - [ ] Test: Context menu works
-- [ ] Delete old monolithic code from `content.ts`
+- [x] Delete old monolithic code from `content.ts`
 
 ### Final Validation
 - [ ] All TypeScript compilation passes

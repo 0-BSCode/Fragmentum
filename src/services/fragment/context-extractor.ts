@@ -1,12 +1,12 @@
 // Context Extractor Service
 // Extracts prefix and suffix context around text selections
 
-import type { IContextExtractor, SelectionContext } from '../../contracts';
+import type { SelectionContext } from '../../contracts';
 
 /**
  * Sanitize context text by removing DOM artifacts and normalizing
  */
-export function sanitizeContextText(text: string): string {
+function sanitizeContextText(text: string): string {
   return text
     .normalize('NFKC')
     .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '') // Zero-width chars
@@ -19,7 +19,7 @@ export function sanitizeContextText(text: string): string {
  * Validate that a word is suitable for use in context
  * Filters out DOM artifacts, very long strings, and non-text content
  */
-export function isValidContextWord(word: string): boolean {
+function isValidContextWord(word: string): boolean {
   if (!word || word.length === 0) return false;
   if (word.length > 50) return false; // Unusually long "words" are likely artifacts
   if (/^[\d\W]+$/.test(word) && word.length > 10) return false; // Long non-word strings
@@ -63,16 +63,3 @@ export function extractContext(
 
   return context;
 }
-
-/**
- * Context Extractor implementation
- * Implements IContextExtractor contract
- */
-export class ContextExtractor implements IContextExtractor {
-  extract(range: Range, prefixWords: number, suffixWords: number): SelectionContext {
-    return extractContext(range, prefixWords, suffixWords);
-  }
-}
-
-// Export singleton instance
-export const contextExtractor = new ContextExtractor();

@@ -1,7 +1,7 @@
 // Fragment Encoder Service
 // Handles URL encoding and text normalization for text fragments
 
-import type { IFragmentEncoder, FragmentParts } from '../../contracts';
+import type { FragmentParts } from '../../contracts';
 
 /**
  * Normalize text for consistent fragment matching
@@ -53,27 +53,3 @@ export function buildFragmentURL(parts: FragmentParts): string {
 
   return currentURL + fragment;
 }
-
-/**
- * Fragment Encoder implementation
- * Implements IFragmentEncoder contract
- */
-export class FragmentEncoder implements IFragmentEncoder {
-  encode(text: string): string {
-    return encodeFragmentComponent(text);
-  }
-}
-
-/**
- * Fragment Builder implementation
- * Implements IFragmentBuilder contract
- */
-export class FragmentBuilder {
-  build(parts: FragmentParts): string {
-    return buildFragmentURL(parts);
-  }
-}
-
-// Export singleton instances
-export const fragmentEncoder = new FragmentEncoder();
-export const fragmentBuilder = new FragmentBuilder();

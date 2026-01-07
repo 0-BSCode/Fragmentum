@@ -1,6 +1,2 @@
 // Clipboard Contracts
-// Defines interfaces for clipboard operations
-
-export interface IClipboardService {
-  copy(text: string): Promise<boolean>;
-}
+// Reserved for future clipboard-related type definitions

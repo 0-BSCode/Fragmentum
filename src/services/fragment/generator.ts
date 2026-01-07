@@ -1,7 +1,7 @@
 // Fragment Generator Service
 // Main service for generating text fragment URLs
 
-import type { IFragmentGenerator, FragmentParts } from '../../contracts';
+import type { FragmentParts } from '../../contracts';
 import { LONG_SELECTION_THRESHOLD, CONTEXT_WORDS } from '../../constants';
 import { normalizeText, encodeFragmentComponent, buildFragmentURL } from './encoder';
 import { extractContext } from './context-extractor';
@@ -46,16 +46,3 @@ export function generateTextFragment(selection: Selection): string {
 
   return buildFragmentURL(fragmentParts);
 }
-
-/**
- * Fragment Generator implementation
- * Implements IFragmentGenerator contract
- */
-export class FragmentGenerator implements IFragmentGenerator {
-  generate(selection: Selection): string {
-    return generateTextFragment(selection);
-  }
-}
-
-// Export singleton instance
-export const fragmentGenerator = new FragmentGenerator();

@@ -1,8 +1,6 @@
 // Clipboard Service
 // Handles clipboard operations with fallback support
 
-import type { IClipboardService } from '../../contracts';
-
 /**
  * Fallback clipboard copy method using execCommand
  */
@@ -46,16 +44,3 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     return copyToClipboardFallback(text);
   }
 }
-
-/**
- * Clipboard Service implementation
- * Implements IClipboardService contract
- */
-export class ClipboardService implements IClipboardService {
-  async copy(text: string): Promise<boolean> {
-    return copyToClipboard(text);
-  }
-}
-
-// Export singleton instance
-export const clipboardService = new ClipboardService();
