@@ -239,30 +239,30 @@ content.ts (composition root)
 ## Progress Checklist
 
 ### Phase 1: Foundation
-- [ ] Create `src/contracts/` directory
-- [ ] Create `contracts/fragment.contract.ts`
-- [ ] Create `contracts/clipboard.contract.ts`
-- [ ] Create `contracts/ui.contract.ts`
-- [ ] Create `contracts/state.contract.ts`
-- [ ] Create `contracts/index.ts` (re-exports)
-- [ ] Create `src/constants/index.ts`
-- [ ] Create `src/state/state.ts`
-- [ ] Create `src/state/index.ts`
-- [ ] Verify TypeScript compilation passes
+- [x] Create `src/contracts/` directory
+- [x] Create `contracts/fragment.contract.ts`
+- [x] Create `contracts/clipboard.contract.ts`
+- [x] Create `contracts/ui.contract.ts`
+- [x] Create `contracts/state.contract.ts`
+- [x] Create `contracts/index.ts` (re-exports)
+- [x] Create `src/constants/index.ts`
+- [x] Create `src/state/state.ts`
+- [x] Create `src/state/index.ts`
+- [x] Verify TypeScript compilation passes
 
 ### Phase 2: Core Services
-- [ ] Create `src/services/fragment/` directory
-- [ ] Implement `services/fragment/encoder.ts`
-- [ ] Implement `services/fragment/context-extractor.ts`
-- [ ] Implement `services/fragment/generator.ts`
-- [ ] Create `services/fragment/index.ts`
-- [ ] Create `src/services/clipboard/` directory
-- [ ] Implement `services/clipboard/clipboard.service.ts`
-- [ ] Create `services/clipboard/index.ts`
-- [ ] Create `src/services/selection/` directory
-- [ ] Implement `services/selection/selection.service.ts`
-- [ ] Create `services/selection/index.ts`
-- [ ] Verify TypeScript compilation passes
+- [x] Create `src/services/fragment/` directory
+- [x] Implement `services/fragment/encoder.ts`
+- [x] Implement `services/fragment/context-extractor.ts`
+- [x] Implement `services/fragment/generator.ts`
+- [x] Create `services/fragment/index.ts`
+- [x] Create `src/services/clipboard/` directory
+- [x] Implement `services/clipboard/clipboard.service.ts`
+- [x] Create `services/clipboard/index.ts`
+- [x] Create `src/services/selection/` directory
+- [x] Implement `services/selection/selection.service.ts`
+- [x] Create `services/selection/index.ts`
+- [x] Verify TypeScript compilation passes
 
 ### Phase 3: UI Layer
 - [ ] Create `src/ui/button/` directory
