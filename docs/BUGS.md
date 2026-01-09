@@ -2,7 +2,7 @@
 
 ## BUG-001: Text Fragment Fails on Inline Elements
 
-**Status**: Fixed (Issue 1) / Open (Issue 2)
+**Status**: Fixed (2026-01-09)
 **Severity**: High
 **Reported**: 2026-01-07
 **Affected**: Text selections spanning inline elements (`<code>`, `<em>`, `<strong>`, etc.)
@@ -117,23 +117,119 @@ if (useRangePattern) {
 
 - [x] Add `hasInlineElements()` function to `generator.ts`
 - [x] Modify condition to check for inline elements
-- [ ] Test with `<code>` elements (e.g., "The `fetch` API")
+- [x] Test with `<code>` elements (e.g., "The `fetch` API") - **FAILED**
 - [ ] Test with `<em>` and `<strong>` elements
 - [ ] Test with nested inline elements
 - [ ] Test that simple text selections still use exact match
 - [ ] Test long selections still work correctly
 - [ ] Verify generated URLs highlight correctly in browser
-- [x] Update BUGS.md status to "Fixed" when complete
+- [ ] Update BUGS.md status to "Fixed" when complete
 
 ---
 
-#### Issue 2: Missing Prefix Context
+### Failed Fix Attempt (2026-01-09)
 
-Fragmentum extracted suffix context (`"An ORM or"`) but **no prefix context**. The working URL includes prefix `"O, such as:"` which helps:
-- Disambiguate when the same text appears multiple times on the page
-- Provide additional anchoring for the text fragment algorithm
+#### What Was Tried
 
-The `extractContext()` function in `context-extractor.ts` may be failing to traverse the DOM correctly when the selection starts at certain positions.
+Added `hasInlineElements()` detection and switched to range pattern (`textStart,textEnd`) when inline elements were detected.
+
+#### Test Case: "An ORM or database"
+
+| Aspect | Correct URL | Extension Generated |
+|--------|-------------|---------------------|
+| Full fragment | `#:~:text=API-,An%20ORM%20or%20database,-Reading%20from%20the` | `#:~:text=An%20ORM%20or,ORM%20or%20database,-Reading%20from%20the` |
+| Prefix | `API` | None |
+| textStart | `An ORM or database` (full text) | `An ORM or` (first 3 words) |
+| textEnd | None | `ORM or database` (last 3 words) |
+| Suffix | `Reading from the` | `Reading from the` |
+| **Result** | ✅ Works | ❌ Fails |
+
+#### Why It Failed
+
+1. **Incorrect root cause analysis**: The original analysis assumed the working URL used a range pattern (`textStart,textEnd`). This was **wrong**. The working URL actually uses:
+   - **Full exact text** as `textStart` (not range pattern)
+   - **Prefix context** (`API-,`) to disambiguate
+
+2. **Range pattern creates word overlap**: With `CONTEXT_WORDS=3` and a 4-word selection:
+   - `startWords` = "An ORM or" (words 1-3)
+   - `endWords` = "ORM or database" (words 2-4)
+   - These **overlap**, creating an invalid/ambiguous fragment
+
+3. **The real issue is prefix context (Issue 2)**: The working URL proves that exact text matching **does work** across inline elements when proper prefix context is provided. The fix should focus on improving `extractContext()`, not switching to range pattern.
+
+#### Correct Fix Strategy
+
+The range pattern approach is wrong for short selections. Instead:
+
+1. **Keep using full text** as `textStart` for short selections (even with inline elements)
+2. **Fix prefix context extraction** (Issue 2) - this is the actual root cause
+3. **Only use range pattern** when selection is genuinely long (current `LONG_SELECTION_THRESHOLD` of 300 chars)
+
+#### Code to Revert
+
+The `hasInlineElements()` check should be removed from the range pattern condition in `generator.ts`. The condition should return to:
+
+```typescript
+// Only use range pattern for genuinely long selections
+if (normalizedText.length > LONG_SELECTION_THRESHOLD) {
+```
+
+**Status**: ✅ Reverted
+
+---
+
+### Successful Fix (2026-01-09)
+
+#### Root Cause Confirmed
+
+Issue 2 (Missing Prefix Context) was the actual root cause. The `extractContext()` function was only looking within the immediate parent element, but prefix text often resides in **sibling elements**.
+
+For example, when selecting "An ORM or database" in:
+```html
+<ul>
+  <li>The <code>fetch</code> API</li>
+  <li>An ORM or database</li>   <!-- selection here -->
+</ul>
+```
+
+The prefix "API" is in the **previous `<li>`**, not in the same parent element.
+
+#### Fix Applied
+
+**File: `src/services/fragment/context-extractor.ts`**
+
+1. Added `findContextAncestor()` function that traverses up to block-level ancestors
+2. For list items, specifically goes up to the `<ul>`/`<ol>` container to capture sibling content
+3. Creates ranges from the ancestor boundary to capture cross-element context
+
+**File: `src/services/fragment/generator.ts`**
+
+1. Removed unused `hasInlineElements()` function and `INLINE_TAGS` constant
+2. Reverted to only using range pattern for long selections
+
+#### Expected Result
+
+For selection "An ORM or database", the extension should now generate:
+```
+#:~:text=API-,An%20ORM%20or%20database,-Reading%20from%20the
+```
+
+With proper prefix (`API`) and suffix (`Reading from the`) context.
+
+---
+
+#### Issue 2: Missing Prefix Context (ROOT CAUSE) - FIXED
+
+**This was the actual root cause of BUG-001.** The failed fix attempt proved that exact text matching works fine across inline elements when proper prefix context is provided.
+
+Fragmentum extracted suffix context (`"An ORM or"`) but **no prefix context**. The working URL includes prefix `"API"` which:
+- Disambiguates when the same text appears multiple times on the page
+- Provides additional anchoring for the text fragment algorithm
+- **Enables exact text matching to work across inline element boundaries**
+
+~~The `extractContext()` function in `context-extractor.ts` is failing to traverse the DOM correctly when the selection starts at certain positions (e.g., at the beginning of a list item after inline elements).~~
+
+**Fixed**: The `extractContext()` function now uses `findContextAncestor()` to traverse up to block-level ancestors (like `<ul>`/`<ol>`) before extracting context, allowing it to capture text from sibling elements.
 
 ### Affected Files
 

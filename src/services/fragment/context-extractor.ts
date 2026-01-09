@@ -3,6 +3,53 @@
 
 import type { SelectionContext } from "@/contracts";
 
+/** Block-level elements that serve as good context boundaries */
+const BLOCK_ELEMENTS = [
+  "article",
+  "aside",
+  "blockquote",
+  "body",
+  "div",
+  "footer",
+  "header",
+  "li",
+  "main",
+  "nav",
+  "ol",
+  "p",
+  "section",
+  "ul",
+];
+
+/**
+ * Find the nearest block-level ancestor that can provide good context.
+ * Stops at list containers (ul/ol) to capture sibling list items.
+ */
+function findContextAncestor(node: Node): Element | null {
+  let current: Node | null = node;
+
+  while (current && current !== document.body) {
+    if (current.nodeType === Node.ELEMENT_NODE) {
+      const el = current as Element;
+      const tag = el.tagName.toLowerCase();
+
+      // For list items, go up to the list container to capture siblings
+      if (tag === "li") {
+        current = current.parentNode;
+        continue;
+      }
+
+      // Stop at good context boundaries
+      if (BLOCK_ELEMENTS.includes(tag)) {
+        return el;
+      }
+    }
+    current = current.parentNode;
+  }
+
+  return document.body;
+}
+
 /**
  * Sanitize context text by removing DOM artifacts and normalizing
  */
@@ -27,8 +74,8 @@ function isValidContextWord(word: string): boolean {
 }
 
 /**
- * Extract prefix and suffix context around a selection range
- * Improved to handle DOM edge cases and filter artifacts
+ * Extract prefix and suffix context around a selection range.
+ * Traverses up to block-level ancestors to capture context from sibling elements.
  */
 export function extractContext(
   range: Range,
@@ -38,25 +85,31 @@ export function extractContext(
   const context: SelectionContext = { prefix: "", suffix: "" };
 
   try {
-    // Get prefix context
-    const prefixRange = range.cloneRange();
-    prefixRange.collapse(true);
-    if (range.startContainer.parentNode) {
-      prefixRange.setStart(range.startContainer.parentNode, 0);
-    }
-    const prefixText = sanitizeContextText(prefixRange.toString());
-    const prefixWordArray = prefixText.split(/\s+/).filter(isValidContextWord);
-    context.prefix = prefixWordArray.slice(-prefixWords).join(" ");
+    // Find a suitable ancestor that contains enough context
+    const contextAncestor = findContextAncestor(range.startContainer);
 
-    // Get suffix context
-    const suffixRange = range.cloneRange();
-    suffixRange.collapse(false);
-    if (range.endContainer.parentNode) {
-      suffixRange.setEndAfter(range.endContainer.parentNode);
+    if (contextAncestor) {
+      // Get prefix context - from ancestor start to selection start
+      const prefixRange = document.createRange();
+      prefixRange.setStart(contextAncestor, 0);
+      prefixRange.setEnd(range.startContainer, range.startOffset);
+
+      const prefixText = sanitizeContextText(prefixRange.toString());
+      const prefixWordArray = prefixText.split(/\s+/).filter(isValidContextWord);
+      context.prefix = prefixWordArray.slice(-prefixWords).join(" ");
+
+      // Get suffix context - from selection end to ancestor end
+      const suffixRange = document.createRange();
+      suffixRange.setStart(range.endContainer, range.endOffset);
+      suffixRange.setEnd(
+        contextAncestor,
+        contextAncestor.childNodes.length,
+      );
+
+      const suffixText = sanitizeContextText(suffixRange.toString());
+      const suffixWordArray = suffixText.split(/\s+/).filter(isValidContextWord);
+      context.suffix = suffixWordArray.slice(0, suffixWords).join(" ");
     }
-    const suffixText = sanitizeContextText(suffixRange.toString());
-    const suffixWordArray = suffixText.split(/\s+/).filter(isValidContextWord);
-    context.suffix = suffixWordArray.slice(0, suffixWords).join(" ");
   } catch (error) {
     console.warn("Could not extract context:", error);
   }
