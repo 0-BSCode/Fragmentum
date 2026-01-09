@@ -1,13 +1,18 @@
 // Event Handlers
 // Implementations for all event handlers
 
-import { DEBOUNCE_DELAY, MESSAGES, ACTIONS } from '../constants';
-import { stateManager } from '../state';
-import { isValidSelection, getSelectionText } from '../services/selection';
-import { generateTextFragment } from '../services/fragment';
-import { copyToClipboard } from '../services/clipboard';
-import { showFloatingButton, hideFloatingButton, showSuccessState, getFloatingButton } from '../ui/button';
-import { showFeedback } from '../ui/feedback';
+import { DEBOUNCE_DELAY, MESSAGES, ACTIONS } from "@/constants";
+import { stateManager } from "@/state";
+import { isValidSelection, getSelectionText } from "@/services/selection";
+import { generateTextFragment } from "@/services/fragment";
+import { copyToClipboard } from "@/services/clipboard";
+import {
+  showFloatingButton,
+  hideFloatingButton,
+  showSuccessState,
+  getFloatingButton,
+} from "@/ui/button";
+import { showFeedback } from "@/ui/feedback";
 
 /**
  * Handle text selection events (debounced)

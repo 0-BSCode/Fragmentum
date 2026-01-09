@@ -1,8 +1,8 @@
 // Fragmentum - Text Fragment Generation Content Script
 // Composition root - orchestrates all modules
 
-import { createFloatingButton } from "./ui/button";
-import { attachEventListeners } from "./events";
+import { createFloatingButton } from "@/ui/button";
+import { attachEventListeners } from "@/events";
 
 /**
  * Initialize the Fragmentum extension

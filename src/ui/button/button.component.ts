@@ -1,8 +1,8 @@
 // Button Component
 // Manages the floating fragment button UI
 
-import { CSS_CLASSES, ELEMENT_IDS, FEEDBACK_DURATION } from '../../constants';
-import { stateManager } from '../../state';
+import { CSS_CLASSES, ELEMENT_IDS, FEEDBACK_DURATION } from "@/constants";
+import { stateManager } from "@/state";
 import { positionButton } from './button.positioning';
 
 /**

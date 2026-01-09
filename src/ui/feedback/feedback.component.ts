@@ -1,9 +1,9 @@
 // Feedback Component
 // Manages user feedback display
 
-import type { FeedbackType } from '../../contracts';
-import { CSS_CLASSES, ELEMENT_IDS, FEEDBACK_DURATION } from '../../constants';
-import { stateManager } from '../../state';
+import type { FeedbackType } from "@/contracts";
+import { CSS_CLASSES, ELEMENT_IDS, FEEDBACK_DURATION } from "@/constants";
+import { stateManager } from "@/state";
 
 /**
  * Display feedback message to user

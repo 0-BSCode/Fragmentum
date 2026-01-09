@@ -1,17 +1,17 @@
 // Context Extractor Service
 // Extracts prefix and suffix context around text selections
 
-import type { SelectionContext } from '../../contracts';
+import type { SelectionContext } from "@/contracts";
 
 /**
  * Sanitize context text by removing DOM artifacts and normalizing
  */
 function sanitizeContextText(text: string): string {
   return text
-    .normalize('NFKC')
-    .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '') // Zero-width chars
-    .replace(/[\x00-\x1F\x7F]/g, '') // Control characters
-    .replace(/\s+/g, ' ')
+    .normalize("NFKC")
+    .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, "") // Zero-width chars
+    .replace(/[\x00-\x1F\x7F]/g, "") // Control characters
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -33,9 +33,9 @@ function isValidContextWord(word: string): boolean {
 export function extractContext(
   range: Range,
   prefixWords: number,
-  suffixWords: number
+  suffixWords: number,
 ): SelectionContext {
-  const context: SelectionContext = { prefix: '', suffix: '' };
+  const context: SelectionContext = { prefix: "", suffix: "" };
 
   try {
     // Get prefix context
@@ -46,7 +46,7 @@ export function extractContext(
     }
     const prefixText = sanitizeContextText(prefixRange.toString());
     const prefixWordArray = prefixText.split(/\s+/).filter(isValidContextWord);
-    context.prefix = prefixWordArray.slice(-prefixWords).join(' ');
+    context.prefix = prefixWordArray.slice(-prefixWords).join(" ");
 
     // Get suffix context
     const suffixRange = range.cloneRange();
@@ -56,9 +56,9 @@ export function extractContext(
     }
     const suffixText = sanitizeContextText(suffixRange.toString());
     const suffixWordArray = suffixText.split(/\s+/).filter(isValidContextWord);
-    context.suffix = suffixWordArray.slice(0, suffixWords).join(' ');
+    context.suffix = suffixWordArray.slice(0, suffixWords).join(" ");
   } catch (error) {
-    console.warn('Could not extract context:', error);
+    console.warn("Could not extract context:", error);
   }
 
   return context;

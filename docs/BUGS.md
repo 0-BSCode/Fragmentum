@@ -2,7 +2,7 @@
 
 ## BUG-001: Text Fragment Fails on Inline Elements
 
-**Status**: Open
+**Status**: Fixed (Issue 1) / Open (Issue 2)
 **Severity**: High
 **Reported**: 2026-01-07
 **Affected**: Text selections spanning inline elements (`<code>`, `<em>`, `<strong>`, etc.)
@@ -54,6 +54,78 @@ The working URL uses a **range pattern** (`The,API`), which tells the browser: "
 - It doesn't require matching the exact middle content
 - It's resilient to whitespace and formatting differences
 - It handles inline elements gracefully
+
+---
+
+### Implementation Plan for Issue 1
+
+#### Strategy: Use Range Pattern for Inline Element Selections
+
+Instead of generating exact text matches, detect when selections span inline elements and automatically switch to the range pattern (`textStart,textEnd`).
+
+#### Code Changes
+
+**File: `src/services/fragment/generator.ts`**
+
+1. Add inline element detection function:
+```typescript
+function hasInlineElements(range: Range): boolean {
+  const container = range.commonAncestorContainer;
+  if (container.nodeType === Node.TEXT_NODE) {
+    return false; // Single text node, no inline elements
+  }
+
+  // Check for inline elements within the range
+  const walker = document.createTreeWalker(
+    container,
+    NodeFilter.SHOW_ELEMENT,
+    {
+      acceptNode: (node) => {
+        const el = node as Element;
+        const tag = el.tagName.toLowerCase();
+        const inlineTags = ['code', 'em', 'strong', 'b', 'i', 'span', 'a', 'mark'];
+        return inlineTags.includes(tag)
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_SKIP;
+      }
+    }
+  );
+
+  return walker.nextNode() !== null;
+}
+```
+
+2. Modify `generateTextFragment()` logic:
+```typescript
+// Use range pattern for: long selections OR inline element crossings
+const useRangePattern = normalizedText.length > LONG_SELECTION_THRESHOLD
+  || hasInlineElements(range);
+
+if (useRangePattern) {
+  const words = normalizedText.split(/\s+/);
+  const startWords = words.slice(0, CONTEXT_WORDS).join(' ');
+  const endWords = words.slice(-CONTEXT_WORDS).join(' ');
+
+  fragmentParts.textStart = encodeFragmentComponent(startWords);
+  fragmentParts.textEnd = encodeFragmentComponent(endWords);
+} else {
+  fragmentParts.textStart = encodeFragmentComponent(normalizedText);
+}
+```
+
+#### Progress Checklist
+
+- [x] Add `hasInlineElements()` function to `generator.ts`
+- [x] Modify condition to check for inline elements
+- [ ] Test with `<code>` elements (e.g., "The `fetch` API")
+- [ ] Test with `<em>` and `<strong>` elements
+- [ ] Test with nested inline elements
+- [ ] Test that simple text selections still use exact match
+- [ ] Test long selections still work correctly
+- [ ] Verify generated URLs highlight correctly in browser
+- [x] Update BUGS.md status to "Fixed" when complete
+
+---
 
 #### Issue 2: Missing Prefix Context
 

@@ -1,7 +1,7 @@
 // Fragmentum - Background Service Worker
 // Handles context menu creation and communication with content script
 
-import { ACTIONS } from './constants';
+import { ACTIONS } from "@/constants";
 
 const CONTEXT_MENU_ID = 'fragmentum-generate';
 const CONTEXT_MENU_TITLE = 'Fragmentum: Generate fragment';

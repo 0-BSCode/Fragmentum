@@ -1,13 +1,20 @@
 // Button Positioning Service
 // Handles intelligent positioning of the floating button
 
-import { BUTTON_DIMENSIONS } from '../../constants';
+import { BUTTON_DIMENSIONS } from "@/constants";
 
 /**
  * Position the button intelligently based on selection bounds and viewport
  */
-export function positionButton(element: HTMLElement, selectionRect: DOMRect): void {
-  const { width: buttonWidth, height: buttonHeight, margin } = BUTTON_DIMENSIONS;
+export function positionButton(
+  element: HTMLElement,
+  selectionRect: DOMRect,
+): void {
+  const {
+    width: buttonWidth,
+    height: buttonHeight,
+    margin,
+  } = BUTTON_DIMENSIONS;
 
   let top = selectionRect.top + window.scrollY - buttonHeight - margin;
   let left = selectionRect.right + window.scrollX - buttonWidth;

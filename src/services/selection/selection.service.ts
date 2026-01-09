@@ -1,7 +1,7 @@
 // Selection Service
 // Handles selection validation and retrieval
 
-import { MIN_SELECTION_LENGTH } from '../../constants';
+import { MIN_SELECTION_LENGTH } from "@/constants";
 
 /**
  * Validate if selection text meets requirements

@@ -1,7 +1,7 @@
 // Fragment Encoder Service
 // Handles URL encoding and text normalization for text fragments
 
-import type { FragmentParts } from '../../contracts';
+import type { FragmentParts } from "@/contracts";
 
 /**
  * Normalize text for consistent fragment matching

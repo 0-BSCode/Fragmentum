@@ -1,7 +1,7 @@
 // Event Listeners
 // Attachment of event listeners to DOM and Chrome APIs
 
-import { getButtonElement } from "../ui/button";
+import { getButtonElement } from "@/ui/button";
 import {
   handleSelection,
   handleKeyboardShortcut,

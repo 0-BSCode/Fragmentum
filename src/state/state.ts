@@ -1,7 +1,7 @@
 // State Manager
 // Centralized application state management
 
-import type { IAppState, IStateManager } from '../contracts';
+import type { IAppState, IStateManager } from "@/contracts";
 
 const initialState: IAppState = {
   floatingButton: null,
