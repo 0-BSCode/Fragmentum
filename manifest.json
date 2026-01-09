@@ -1,9 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Fragmentum",
-  "version": "2.0.0",
-  "description": "Generate URL fragments from text selections and customize page backgrounds",
+  "version": "2.1.0",
+  "description": "Generate URL fragments from text selections, collect highlights, and compile them into shareable links",
   "permissions": ["activeTab", "scripting", "clipboardWrite", "storage", "contextMenus"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Fragmentum - View Highlights"
+  },
   "background": {
     "service_worker": "scripts/background.iife.js"
   },

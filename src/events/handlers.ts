@@ -1,7 +1,7 @@
 // Event Handlers
 // Implementations for all event handlers
 
-import { DEBOUNCE_DELAY, MESSAGES, ACTIONS } from "@/constants";
+import { DEBOUNCE_DELAY, MESSAGES, ACTIONS, MAX_DISPLAY_TEXT_LENGTH } from "@/constants";
 import { stateManager } from "@/state";
 import { isValidSelection, getSelectionText } from "@/services/selection";
 import { generateTextFragment } from "@/services/fragment";
@@ -13,6 +13,8 @@ import {
   getFloatingButton,
 } from "@/ui/button";
 import { showFeedback } from "@/ui/feedback";
+import { generateUUID } from "@/services/compile.service";
+import type { IHighlight } from "@/contracts";
 
 /**
  * Handle text selection events (debounced)
@@ -74,6 +76,7 @@ export function handleClickOutside(e: MouseEvent): void {
 
 /**
  * Main handler for fragment generation and clipboard copy
+ * Also auto-saves highlight to collection for later compilation
  */
 export async function handleFragmentGeneration(): Promise<void> {
   const selection = window.getSelection();
@@ -96,10 +99,49 @@ export async function handleFragmentGeneration(): Promise<void> {
     if (success) {
       showSuccessState();
       showFeedback(MESSAGES.copied, 'success');
+
+      // Auto-save highlight to collection
+      await saveHighlightToCollection(fragmentURL, text);
     }
   } catch (error) {
     console.error('Fragmentum error:', error);
     showFeedback(MESSAGES.copyFailed, 'error');
+  }
+}
+
+/**
+ * Save generated highlight to collection for later compilation
+ */
+async function saveHighlightToCollection(fragmentURL: string, selectedText: string): Promise<void> {
+  try {
+    // Extract base URL and fragment portion
+    const [baseUrl, fragment] = fragmentURL.split('#:~:');
+
+    // Only save if we have a valid fragment
+    if (!fragment) {
+      return;
+    }
+
+    // Get the page URL without any existing fragment
+    const pageUrl = window.location.href.split('#')[0];
+
+    // Create highlight data
+    const highlight: IHighlight = {
+      id: generateUUID(),
+      pageUrl,
+      fragment, // Already in format "text=encoded%20text"
+      selectedText: selectedText.substring(0, MAX_DISPLAY_TEXT_LENGTH),
+      timestamp: Date.now(),
+    };
+
+    // Send to background for storage
+    chrome.runtime.sendMessage({
+      action: ACTIONS.highlightAdded,
+      data: highlight,
+    });
+  } catch (error) {
+    // Silently fail - saving is not critical to main functionality
+    console.warn('Fragmentum: Failed to save highlight to collection:', error);
   }
 }
 

@@ -5,3 +5,4 @@ export * from './fragment.contract';
 export * from './clipboard.contract';
 export * from './ui.contract';
 export * from './state.contract';
+export * from './highlight.contract';

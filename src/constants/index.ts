@@ -6,6 +6,13 @@ export const FEEDBACK_DURATION = 2000;
 export const MIN_SELECTION_LENGTH = 1;
 export const LONG_SELECTION_THRESHOLD = 300;
 export const CONTEXT_WORDS = 3;
+export const MAX_DISPLAY_TEXT_LENGTH = 100;
+
+// Storage configuration
+export const STORAGE_VERSION = 1;
+export const STORAGE_KEYS = {
+  highlights: 'fragmentum_highlights',
+} as const;
 
 export const BUTTON_DIMENSIONS = {
   width: 40,
@@ -38,4 +45,9 @@ export const MESSAGES = {
 
 export const ACTIONS = {
   generateFragment: "generateFragment",
+  highlightAdded: "highlightAdded",
+  getHighlights: "getHighlights",
+  removeHighlight: "removeHighlight",
+  clearHighlights: "clearHighlights",
+  compileHighlights: "compileHighlights",
 } as const;

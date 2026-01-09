@@ -17,4 +17,12 @@ export default defineConfig([
     minify: false,
     treeshake: true,
   },
+  {
+    entry: ["src/popup/popup.ts"],
+    format: "iife",
+    outDir: "scripts",
+    clean: false,
+    minify: false,
+    treeshake: true,
+  },
 ]);
