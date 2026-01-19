@@ -13,7 +13,7 @@ import type { IHighlight } from "@/contracts";
  * Handle keyboard shortcut (Ctrl+Shift+L or Cmd+Shift+L)
  */
 export function handleKeyboardShortcut(e: KeyboardEvent): void {
-  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "L") {
     e.preventDefault();
     handleFragmentGeneration();
   }
@@ -28,13 +28,13 @@ export async function handleFragmentGeneration(): Promise<void> {
   const text = getSelectionText();
 
   if (!isValidSelection(text)) {
-    showToast(MESSAGES.selectText, 'error');
+    showToast(MESSAGES.selectText, "error");
     return;
   }
 
   try {
     if (!selection) {
-      showToast(MESSAGES.noSelection, 'error');
+      showToast(MESSAGES.noSelection, "error");
       return;
     }
 
@@ -42,24 +42,27 @@ export async function handleFragmentGeneration(): Promise<void> {
     const success = await copyToClipboard(fragmentURL);
 
     if (success) {
-      showToast(MESSAGES.copied, 'success');
+      showToast(MESSAGES.copied, "success");
 
       // Auto-save highlight to collection
       await saveHighlightToCollection(fragmentURL, text);
     }
   } catch (error) {
-    console.error('Fragmentum error:', error);
-    showToast(MESSAGES.copyFailed, 'error');
+    console.error("Fragmentum error:", error);
+    showToast(MESSAGES.copyFailed, "error");
   }
 }
 
 /**
  * Save generated highlight to collection for later compilation
  */
-async function saveHighlightToCollection(fragmentURL: string, selectedText: string): Promise<void> {
+async function saveHighlightToCollection(
+  fragmentURL: string,
+  selectedText: string,
+): Promise<void> {
   try {
     // Extract fragment portion
-    const [, fragment] = fragmentURL.split('#:~:');
+    const [, fragment] = fragmentURL.split("#:~:");
 
     // Only save if we have a valid fragment
     if (!fragment) {
@@ -67,7 +70,7 @@ async function saveHighlightToCollection(fragmentURL: string, selectedText: stri
     }
 
     // Get the page URL without any existing fragment
-    const pageUrl = window.location.href.split('#')[0];
+    const pageUrl = window.location.href.split("#")[0];
 
     // Create highlight data
     const highlight: IHighlight = {
@@ -85,7 +88,7 @@ async function saveHighlightToCollection(fragmentURL: string, selectedText: stri
     });
   } catch (error) {
     // Silently fail - saving is not critical to main functionality
-    console.warn('Fragmentum: Failed to save highlight to collection:', error);
+    console.warn("Fragmentum: Failed to save highlight to collection:", error);
   }
 }
 

@@ -12,6 +12,7 @@ function init(): void {
   // Create UI components
   createToast();
 
+  console.log(document.fragmentDirective);
   // Attach the event listeners
   attachEventListeners();
 }
