@@ -10,6 +10,26 @@ import {
 } from "./encoder";
 import { extractContext } from "./context-extractor";
 
+// Inline elements that can break text fragment matching
+const INLINE_ELEMENT_SELECTOR =
+  "a, code, em, strong, span, b, i, mark, abbr, cite, q, sub, sup, time, var, kbd, samp";
+
+/**
+ * Detect if selection spans inline elements
+ * Text fragments have trouble matching across inline element boundaries
+ */
+function selectionSpansInlineElements(range: Range): boolean {
+  // If start and end are in different containers, likely spans elements
+  if (range.startContainer !== range.endContainer) {
+    return true;
+  }
+
+  // Check for inline elements within the selection
+  const fragment = range.cloneContents();
+  const inlineElements = fragment.querySelectorAll(INLINE_ELEMENT_SELECTOR);
+  return inlineElements.length > 0;
+}
+
 /**
  * Generate a Text Fragment URL from a selection
  * Format: #:~:text=[prefix-,]textStart[,textEnd][,-suffix]
@@ -27,14 +47,21 @@ export function generateTextFragment(selection: Selection): string {
     textStart: "",
   };
 
-  // Use range pattern (textStart,textEnd) for long selections only
-  if (normalizedText.length > LONG_SELECTION_THRESHOLD) {
-    const words = normalizedText.split(/\s+/);
-    const startWords = words.slice(0, CONTEXT_WORDS).join(" ");
-    const endWords = words.slice(-CONTEXT_WORDS).join(" ");
+  const words = normalizedText.split(/\s+/);
 
-    fragmentParts.textStart = encodeFragmentComponent(startWords);
-    fragmentParts.textEnd = encodeFragmentComponent(endWords);
+  // Use range pattern (textStart,textEnd) when:
+  // 1. Long selection (> threshold), OR
+  // 2. Selection spans inline elements AND has multiple words
+  const hasInlineElements = selectionSpansInlineElements(range);
+  const useRangePattern =
+    normalizedText.length > LONG_SELECTION_THRESHOLD ||
+    (hasInlineElements && words.length > 1);
+
+  if (useRangePattern && words.length > 1) {
+    // Use first and last words for range pattern
+    // This avoids problematic inline elements in the match string
+    fragmentParts.textStart = encodeFragmentComponent(words[0]);
+    fragmentParts.textEnd = encodeFragmentComponent(words[words.length - 1]);
   } else {
     fragmentParts.textStart = encodeFragmentComponent(normalizedText);
   }

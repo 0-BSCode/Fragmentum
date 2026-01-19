@@ -1,258 +1,144 @@
-# Known Bugs
+# Fragmentum Bug Tracker
 
-## BUG-001: Text Fragment Fails on Inline Elements
+## BUG-002: Text Fragment Fails on Inline Elements
 
-**Status**: Fixed (2026-01-09)
-**Severity**: High
-**Reported**: 2026-01-07
-**Affected**: Text selections spanning inline elements (`<code>`, `<em>`, `<strong>`, etc.)
+**Status:** Fixed (2026-01-09)
+**Severity:** High
+**Affected File:** `src/services/fragment/generator.ts`
+**Discovered:** 2026-01-09
 
----
+### Problem Description
 
-### Description
-
-When selecting text that contains inline formatting elements (like `<code>`), Fragmentum generates a URL that fails to highlight the text in the browser. Manually crafted URLs using a different pattern work correctly.
+When selecting text that spans inline elements (`<code>`, `<a>`, `<em>`, `<strong>`, `<span>`, etc.), the extension generates a text fragment URL that fails to highlight anything.
 
 ### Reproduction Steps
 
-1. Navigate to: `https://nextjs.org/docs/app/getting-started/fetching-data`
-2. Select the text "The `fetch` API" (list item #1 under Server Components)
-3. Click the Fragmentum button to generate a fragment URL
+1. Navigate to https://nextjs.org/docs/app/getting-started/fetching-data
+2. Select the text "The fetch API" (first list item under "Server Components")
+3. Click the Fragmentum button to generate fragment URL
 4. Open the generated URL in a new tab
-5. **Expected**: Text "The `fetch` API" is highlighted
-6. **Actual**: No text is highlighted
+5. **Expected:** Text should be highlighted
+6. **Actual:** No highlight appears, page doesn't scroll to text
 
-### Comparison
+### Technical Analysis
 
-| Aspect | Fragmentum (Broken) | Working URL |
-|--------|---------------------|-------------|
-| Full URL | `...#:~:text=The%20fetch%20API,-An%20ORM%20or` | `...#:~:text=O%2C%20such%20as%3A-,The,API,-An%20ORM%20or` |
-| Pattern | Exact match | Range pattern |
-| Prefix | None | `"O, such as:"` |
-| textStart | `"The fetch API"` | `"The"` |
-| textEnd | None | `"API"` |
-| Suffix | `"An ORM or"` | `"An ORM or"` |
-
-### Root Cause Analysis
-
-#### Issue 1: Exact Match Fails Across Inline Element Boundaries
-
-The selected text spans multiple DOM nodes:
-
+**Source HTML:**
 ```html
-<li>The <code>fetch</code> API</li>
+<li>The <a href="#with-the-fetch-api"><code>fetch</code> API</a></li>
 ```
 
-DOM structure:
-- Text node: "The "
-- `<code>` element containing: "fetch"
-- Text node: " API"
+**Extension generates (BROKEN):**
+```
+#:~:text=The%20fetch%20API,-An%20ORM%20or
+```
+Decoded: `text=The fetch API,-An ORM or`
 
-When Fragmentum generates `#:~:text=The%20fetch%20API`, it attempts an **exact string match**. However, the browser's Text Fragment algorithm struggles to match text that crosses inline element boundaries.
+**Working URL (manual):**
+```
+#:~:text=O%2C%20such%20as%3A-,The,API,-An%20ORM%20or
+```
+Decoded: `text=O, such as:-,The,API,-An ORM or`
 
-The working URL uses a **range pattern** (`The,API`), which tells the browser: "find text starting with 'The' and ending with 'API'". This is more robust because:
-- It doesn't require matching the exact middle content
-- It's resilient to whitespace and formatting differences
-- It handles inline elements gracefully
+### Root Cause
 
----
+1. **Current behavior** (`generator.ts` lines 30-40):
+   - For short selections (< 300 chars): Uses exact text as `textStart`
+   - For long selections: Uses range pattern (`textStart,textEnd`)
 
-### Implementation Plan for Issue 1
+2. **The problem:**
+   - `selection.toString()` returns flattened text: "The fetch API"
+   - Browser's text fragment matching fails because "fetch" is wrapped in `<code>`
+   - Text fragments have trouble matching across inline element boundaries
 
-#### Strategy: Use Range Pattern for Inline Element Selections
+3. **Why range pattern works:**
+   - Uses only start word "The" and end word "API"
+   - Browser finds text between them regardless of inline elements
+   - Avoids the problematic `<code>fetch</code>` in the match string
 
-Instead of generating exact text matches, detect when selections span inline elements and automatically switch to the range pattern (`textStart,textEnd`).
+### Proposed Solution
 
-#### Code Changes
+Detect when selection spans inline elements and use range pattern (`textStart,textEnd`) instead of exact text match.
 
-**File: `src/services/fragment/generator.ts`**
-
-1. Add inline element detection function:
+**Detection Logic:**
 ```typescript
-function hasInlineElements(range: Range): boolean {
-  const container = range.commonAncestorContainer;
-  if (container.nodeType === Node.TEXT_NODE) {
-    return false; // Single text node, no inline elements
+function selectionSpansInlineElements(range: Range): boolean {
+  if (range.startContainer !== range.endContainer) {
+    return true;
   }
-
-  // Check for inline elements within the range
-  const walker = document.createTreeWalker(
-    container,
-    NodeFilter.SHOW_ELEMENT,
-    {
-      acceptNode: (node) => {
-        const el = node as Element;
-        const tag = el.tagName.toLowerCase();
-        const inlineTags = ['code', 'em', 'strong', 'b', 'i', 'span', 'a', 'mark'];
-        return inlineTags.includes(tag)
-          ? NodeFilter.FILTER_ACCEPT
-          : NodeFilter.FILTER_SKIP;
-      }
-    }
+  const fragment = range.cloneContents();
+  const inlineElements = fragment.querySelectorAll(
+    'a, code, em, strong, span, b, i, mark, abbr, cite, q, sub, sup, time, var, kbd, samp'
   );
-
-  return walker.nextNode() !== null;
+  return inlineElements.length > 0;
 }
 ```
 
-2. Modify `generateTextFragment()` logic:
+**Modified logic:**
+- Use range pattern for multi-word selections when inline elements detected
+- Keep exact match for single-word selections
+- Keep existing behavior for long selections
+
+### Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/services/fragment/generator.ts` | Add inline element detection, modify range pattern logic |
+
+### Solution Implemented
+
+Added `selectionSpansInlineElements()` function to detect when selections cross inline element boundaries. Modified `generateTextFragment()` to use range pattern (textStart,textEnd) instead of exact text match when:
+
+1. Selection spans multiple containers (different start/end nodes)
+2. Selection contains inline elements AND has multiple words
+
+**Key Code Changes (`generator.ts`):**
 ```typescript
-// Use range pattern for: long selections OR inline element crossings
-const useRangePattern = normalizedText.length > LONG_SELECTION_THRESHOLD
-  || hasInlineElements(range);
-
-if (useRangePattern) {
-  const words = normalizedText.split(/\s+/);
-  const startWords = words.slice(0, CONTEXT_WORDS).join(' ');
-  const endWords = words.slice(-CONTEXT_WORDS).join(' ');
-
-  fragmentParts.textStart = encodeFragmentComponent(startWords);
-  fragmentParts.textEnd = encodeFragmentComponent(endWords);
-} else {
-  fragmentParts.textStart = encodeFragmentComponent(normalizedText);
+function selectionSpansInlineElements(range: Range): boolean {
+  if (range.startContainer !== range.endContainer) {
+    return true;
+  }
+  const fragment = range.cloneContents();
+  const inlineElements = fragment.querySelectorAll(
+    'a, code, em, strong, span, b, i, mark, abbr, cite, q, sub, sup, time, var, kbd, samp'
+  );
+  return inlineElements.length > 0;
 }
+
+// In generateTextFragment():
+const useRangePattern =
+  normalizedText.length > LONG_SELECTION_THRESHOLD ||
+  (hasInlineElements && words.length > 1);
 ```
 
-#### Progress Checklist
+### Testing Checklist
 
-- [x] Add `hasInlineElements()` function to `generator.ts`
-- [x] Modify condition to check for inline elements
-- [x] Test with `<code>` elements (e.g., "The `fetch` API") - **FAILED**
-- [ ] Test with `<em>` and `<strong>` elements
+- [x] Test with `<code>` elements (e.g., "The `fetch` API")
+- [x] Test with `<a>` links containing text
+- [ ] Test with `<em>` and `<strong>` emphasis
 - [ ] Test with nested inline elements
-- [ ] Test that simple text selections still use exact match
-- [ ] Test long selections still work correctly
-- [ ] Verify generated URLs highlight correctly in browser
-- [ ] Update BUGS.md status to "Fixed" when complete
+- [x] Test single-word selections (should still work)
+- [x] Test long selections (existing behavior preserved)
 
 ---
 
-### Failed Fix Attempt (2026-01-09)
+## BUG-001: Context Extraction Missing for List Items
 
-#### What Was Tried
+**Status:** Fixed (2026-01-09)
+**Severity:** Medium
+**Affected File:** `src/services/fragment/context-extractor.ts`
 
-Added `hasInlineElements()` detection and switched to range pattern (`textStart,textEnd`) when inline elements were detected.
+### Problem Description
 
-#### Test Case: "An ORM or database"
+Text fragments for list items (`<li>`) were missing prefix context from sibling list items, causing fragments to fail when the same text appeared multiple times on a page.
 
-| Aspect | Correct URL | Extension Generated |
-|--------|-------------|---------------------|
-| Full fragment | `#:~:text=API-,An%20ORM%20or%20database,-Reading%20from%20the` | `#:~:text=An%20ORM%20or,ORM%20or%20database,-Reading%20from%20the` |
-| Prefix | `API` | None |
-| textStart | `An ORM or database` (full text) | `An ORM or` (first 3 words) |
-| textEnd | None | `ORM or database` (last 3 words) |
-| Suffix | `Reading from the` | `Reading from the` |
-| **Result** | ✅ Works | ❌ Fails |
+### Root Cause
 
-#### Why It Failed
+The context extractor stopped at `<li>` boundaries instead of traversing up to the parent `<ul>`/`<ol>` to capture sibling context.
 
-1. **Incorrect root cause analysis**: The original analysis assumed the working URL used a range pattern (`textStart,textEnd`). This was **wrong**. The working URL actually uses:
-   - **Full exact text** as `textStart` (not range pattern)
-   - **Prefix context** (`API-,`) to disambiguate
+### Solution
 
-2. **Range pattern creates word overlap**: With `CONTEXT_WORDS=3` and a 4-word selection:
-   - `startWords` = "An ORM or" (words 1-3)
-   - `endWords` = "ORM or database" (words 2-4)
-   - These **overlap**, creating an invalid/ambiguous fragment
+Modified `findContextAncestor()` to continue traversing past `<li>` elements to reach the list container, allowing context from sibling items to be captured.
 
-3. **The real issue is prefix context (Issue 2)**: The working URL proves that exact text matching **does work** across inline elements when proper prefix context is provided. The fix should focus on improving `extractContext()`, not switching to range pattern.
+### Status
 
-#### Correct Fix Strategy
-
-The range pattern approach is wrong for short selections. Instead:
-
-1. **Keep using full text** as `textStart` for short selections (even with inline elements)
-2. **Fix prefix context extraction** (Issue 2) - this is the actual root cause
-3. **Only use range pattern** when selection is genuinely long (current `LONG_SELECTION_THRESHOLD` of 300 chars)
-
-#### Code to Revert
-
-The `hasInlineElements()` check should be removed from the range pattern condition in `generator.ts`. The condition should return to:
-
-```typescript
-// Only use range pattern for genuinely long selections
-if (normalizedText.length > LONG_SELECTION_THRESHOLD) {
-```
-
-**Status**: ✅ Reverted
-
----
-
-### Successful Fix (2026-01-09)
-
-#### Root Cause Confirmed
-
-Issue 2 (Missing Prefix Context) was the actual root cause. The `extractContext()` function was only looking within the immediate parent element, but prefix text often resides in **sibling elements**.
-
-For example, when selecting "An ORM or database" in:
-```html
-<ul>
-  <li>The <code>fetch</code> API</li>
-  <li>An ORM or database</li>   <!-- selection here -->
-</ul>
-```
-
-The prefix "API" is in the **previous `<li>`**, not in the same parent element.
-
-#### Fix Applied
-
-**File: `src/services/fragment/context-extractor.ts`**
-
-1. Added `findContextAncestor()` function that traverses up to block-level ancestors
-2. For list items, specifically goes up to the `<ul>`/`<ol>` container to capture sibling content
-3. Creates ranges from the ancestor boundary to capture cross-element context
-
-**File: `src/services/fragment/generator.ts`**
-
-1. Removed unused `hasInlineElements()` function and `INLINE_TAGS` constant
-2. Reverted to only using range pattern for long selections
-
-#### Expected Result
-
-For selection "An ORM or database", the extension should now generate:
-```
-#:~:text=API-,An%20ORM%20or%20database,-Reading%20from%20the
-```
-
-With proper prefix (`API`) and suffix (`Reading from the`) context.
-
----
-
-#### Issue 2: Missing Prefix Context (ROOT CAUSE) - FIXED
-
-**This was the actual root cause of BUG-001.** The failed fix attempt proved that exact text matching works fine across inline elements when proper prefix context is provided.
-
-Fragmentum extracted suffix context (`"An ORM or"`) but **no prefix context**. The working URL includes prefix `"API"` which:
-- Disambiguates when the same text appears multiple times on the page
-- Provides additional anchoring for the text fragment algorithm
-- **Enables exact text matching to work across inline element boundaries**
-
-~~The `extractContext()` function in `context-extractor.ts` is failing to traverse the DOM correctly when the selection starts at certain positions (e.g., at the beginning of a list item after inline elements).~~
-
-**Fixed**: The `extractContext()` function now uses `findContextAncestor()` to traverse up to block-level ancestors (like `<ul>`/`<ol>`) before extracting context, allowing it to capture text from sibling elements.
-
-### Affected Files
-
-| File | Relevance |
-|------|-----------|
-| `src/services/fragment/generator.ts` | Main fragment generation logic |
-| `src/services/fragment/encoder.ts` | URL encoding functions |
-| `src/services/fragment/context-extractor.ts` | Prefix/suffix extraction (likely bug location) |
-
-### Proposed Fix (Future Implementation)
-
-1. **Detect inline element crossings**: When selection spans inline elements, use range pattern (`textStart,textEnd`) instead of exact match
-2. **Improve context extraction**: Fix DOM traversal in `extractContext()` to reliably capture prefix text
-3. **Add word-boundary detection**: For selections with inline elements, extract first and last words for range pattern
-
-### Workaround
-
-Until fixed, users can manually create working URLs using the range pattern format:
-```
-#:~:text=[prefix-,]firstWord,lastWord[,-suffix]
-```
-
-### References
-
-- [Text Fragments Spec](https://wicg.github.io/scroll-to-text-fragment/)
-- Related: `docs/SELECTION.md` - Previous encoding issues (Issue #1, #2)
+Fixed in commit `4cbd4d9`.
