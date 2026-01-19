@@ -4,22 +4,9 @@
 import { CSS_CLASSES, ELEMENT_IDS, FEEDBACK_DURATION } from "@/constants";
 import { stateManager } from "@/state";
 
-/**
- * Toast HTML template
- */
-const TOAST_TEMPLATE = `
-  <div class="${CSS_CLASSES.toastContent}">
-    <svg class="${CSS_CLASSES.toastIconSuccess}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="20 6 9 17 4 12"></polyline>
-    </svg>
-    <svg class="${CSS_CLASSES.toastIconError}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"></circle>
-      <line x1="15" y1="9" x2="9" y2="15"></line>
-      <line x1="9" y1="9" x2="15" y2="15"></line>
-    </svg>
-    <span class="${CSS_CLASSES.toastMessage}"></span>
-  </div>
-`;
+// ============================================================
+// Exported Functions
+// ============================================================
 
 /**
  * Create the toast element and inject into DOM
@@ -90,3 +77,24 @@ export function hideToast(): void {
 
   toast.classList.remove(CSS_CLASSES.toastVisible);
 }
+
+// ============================================================
+// Internal Constants
+// ============================================================
+
+/**
+ * Toast HTML template
+ */
+const TOAST_TEMPLATE = `
+  <div class="${CSS_CLASSES.toastContent}">
+    <svg class="${CSS_CLASSES.toastIconSuccess}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <svg class="${CSS_CLASSES.toastIconError}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="15" y1="9" x2="9" y2="15"></line>
+      <line x1="9" y1="9" x2="15" y2="15"></line>
+    </svg>
+    <span class="${CSS_CLASSES.toastMessage}"></span>
+  </div>
+`;

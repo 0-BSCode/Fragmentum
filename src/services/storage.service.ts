@@ -5,14 +5,19 @@ import type { IHighlight, IHighlightCollection, IHighlightStorage } from '@/cont
 import { STORAGE_KEYS, STORAGE_VERSION } from '@/constants';
 
 /**
- * Get the default empty storage structure
+ * Storage service API
  */
-function getDefaultStorage(): IHighlightStorage {
-  return {
-    highlights: {},
-    version: STORAGE_VERSION,
-  };
-}
+export const storageService = {
+  addHighlight,
+  getHighlightsForPage,
+  removeHighlight,
+  clearHighlightsForPage,
+  getAllHighlights,
+};
+
+// ============================================================
+// Internal Functions
+// ============================================================
 
 /**
  * Read all highlights from storage
@@ -88,14 +93,3 @@ async function clearHighlightsForPage(pageUrl: string): Promise<void> {
     await saveHighlights(highlights);
   }
 }
-
-/**
- * Storage service API
- */
-export const storageService = {
-  addHighlight,
-  getHighlightsForPage,
-  removeHighlight,
-  clearHighlightsForPage,
-  getAllHighlights,
-};

@@ -7,6 +7,18 @@ import {
 } from "./handlers";
 
 /**
+ * Attach all event listeners
+ */
+export function attachEventListeners(): void {
+  attachKeyboardListener();
+  attachMessageListener();
+}
+
+// ============================================================
+// Internal Functions
+// ============================================================
+
+/**
  * Attach keyboard shortcut listener
  */
 function attachKeyboardListener(): void {
@@ -20,12 +32,4 @@ function attachMessageListener(): void {
   chrome.runtime.onMessage.addListener((message) => {
     handleMessage(message);
   });
-}
-
-/**
- * Attach all event listeners
- */
-export function attachEventListeners(): void {
-  attachKeyboardListener();
-  attachMessageListener();
 }

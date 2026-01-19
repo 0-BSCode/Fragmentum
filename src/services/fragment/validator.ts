@@ -5,6 +5,10 @@
 import type { FragmentParts } from "@/contracts";
 import { normalizeText } from "./encoder";
 
+// ============================================================
+// Exported Types
+// ============================================================
+
 /**
  * Result of validating a fragment against the document
  */
@@ -14,13 +18,9 @@ export interface ValidationResult {
   matchesSelection: boolean;
 }
 
-/**
- * A match found in the document
- */
-interface FragmentMatch {
-  range: Range;
-  text: string;
-}
+// ============================================================
+// Exported Functions
+// ============================================================
 
 /**
  * Validate that a fragment uniquely matches the expected selection
@@ -147,6 +147,31 @@ export function isUniquelyIdentifying(parts: FragmentParts): boolean {
   return matches.length === 1;
 }
 
+// ============================================================
+// Internal Types
+// ============================================================
+
+/**
+ * A match found in the document
+ */
+interface FragmentMatch {
+  range: Range;
+  text: string;
+}
+
+/**
+ * Build a map of text positions to nodes
+ */
+interface TextNodeMap {
+  node: Text;
+  start: number;
+  end: number;
+}
+
+// ============================================================
+// Internal Functions
+// ============================================================
+
 /**
  * Get all text nodes in an element
  */
@@ -178,15 +203,6 @@ function getTextNodes(element: Element): Text[] {
   }
 
   return textNodes;
-}
-
-/**
- * Build a map of text positions to nodes
- */
-interface TextNodeMap {
-  node: Text;
-  start: number;
-  end: number;
 }
 
 function buildTextMap(textNodes: Text[]): {

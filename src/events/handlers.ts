@@ -9,6 +9,10 @@ import { showToast } from "@/ui/toast";
 import { generateUUID } from "@/services/compile.service";
 import type { IHighlight } from "@/contracts";
 
+// ============================================================
+// Exported Functions
+// ============================================================
+
 /**
  * Handle keyboard shortcut (Ctrl+Shift+L or Cmd+Shift+L)
  */
@@ -54,6 +58,19 @@ export async function handleFragmentGeneration(): Promise<void> {
 }
 
 /**
+ * Handle messages from background script (context menu)
+ */
+export function handleMessage(message: { action: string }): void {
+  if (message.action === ACTIONS.generateFragment) {
+    handleFragmentGeneration();
+  }
+}
+
+// ============================================================
+// Internal Functions
+// ============================================================
+
+/**
  * Save generated highlight to collection for later compilation
  */
 async function saveHighlightToCollection(
@@ -89,14 +106,5 @@ async function saveHighlightToCollection(
   } catch (error) {
     // Silently fail - saving is not critical to main functionality
     console.warn("Fragmentum: Failed to save highlight to collection:", error);
-  }
-}
-
-/**
- * Handle messages from background script (context menu)
- */
-export function handleMessage(message: { action: string }): void {
-  if (message.action === ACTIONS.generateFragment) {
-    handleFragmentGeneration();
   }
 }

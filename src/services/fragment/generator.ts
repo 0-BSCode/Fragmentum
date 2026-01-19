@@ -18,10 +18,75 @@ import {
 import { extractContext } from "./context-extractor";
 import { isUniquelyIdentifying, validateFragment } from "./validator";
 
+// ============================================================
+// Exported Functions
+// ============================================================
+
+/**
+ * Generate a Text Fragment URL from a selection
+ * Uses iterative expansion to ensure unique matching
+ * Format: #:~:text=[prefix-,]textStart[,textEnd][,-suffix]
+ */
+export function generateTextFragment(selection: Selection): string {
+  if (!selection.rangeCount) {
+    throw new Error("No selection range available");
+  }
+
+  const originalRange = selection.getRangeAt(0);
+
+  // Expand to word boundaries for more stable fragments
+  const range = expandToWordBoundaries(originalRange);
+
+  const selectedText = range.toString().trim();
+  const normalizedText = normalizeText(selectedText);
+
+  if (!normalizedText) {
+    throw new Error("No text selected");
+  }
+
+  const words = normalizedText.split(/\s+/).filter((w) => w.length > 0);
+
+  if (words.length === 0) {
+    throw new Error("No valid words in selection");
+  }
+
+  // Determine strategy
+  const strategy = determineStrategy(normalizedText, range);
+
+  // For single-word selections, use exact match
+  if (words.length === 1) {
+    return generateSimpleFragment(words[0], range);
+  }
+
+  // Use FragmentFactory for iterative expansion
+  const factory = new FragmentFactory(words, range, strategy);
+
+  try {
+    const parts = factory.tryToMakeUniqueFragment();
+    if (parts) {
+      return buildFragmentURL(parts);
+    }
+  } catch (error) {
+    // Timeout or other error - fall back to simple generation
+    console.warn("Fragment generation error:", error);
+  }
+
+  // Fallback: generate without validation
+  return generateFallbackFragment(words, range, strategy);
+}
+
+// ============================================================
+// Internal Types
+// ============================================================
+
 /**
  * Fragment generation strategy
  */
 type GenerationStrategy = "EXACT_MATCH" | "RANGE_PATTERN";
+
+// ============================================================
+// Internal Classes
+// ============================================================
 
 /**
  * FragmentFactory - Manages iterative expansion for unique fragment generation
@@ -143,6 +208,7 @@ class FragmentFactory {
 
       // Validate uniqueness
       const validation = validateFragment(fragment, this.range);
+      console.log(validation);
 
       if (validation.isUnique && validation.matchesSelection) {
         return fragment;
@@ -159,6 +225,10 @@ class FragmentFactory {
     return this.build();
   }
 }
+
+// ============================================================
+// Internal Functions
+// ============================================================
 
 /**
  * Expand a range to word boundaries
@@ -231,19 +301,15 @@ function containsBlockBoundary(range: Range): boolean {
   const fragment = range.cloneContents();
 
   // Check if any block elements exist in the selection
-  const walker = document.createTreeWalker(
-    fragment,
-    NodeFilter.SHOW_ELEMENT,
-    {
-      acceptNode: (node) => {
-        const element = node as Element;
-        if (BLOCK_ELEMENTS.has(element.tagName)) {
-          return NodeFilter.FILTER_ACCEPT;
-        }
-        return NodeFilter.FILTER_SKIP;
-      },
+  const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_ELEMENT, {
+    acceptNode: (node) => {
+      const element = node as Element;
+      if (BLOCK_ELEMENTS.has(element.tagName)) {
+        return NodeFilter.FILTER_ACCEPT;
+      }
+      return NodeFilter.FILTER_SKIP;
     },
-  );
+  });
 
   return walker.nextNode() !== null;
 }
@@ -266,59 +332,6 @@ function determineStrategy(
   }
 
   return "EXACT_MATCH";
-}
-
-/**
- * Generate a Text Fragment URL from a selection
- * Uses iterative expansion to ensure unique matching
- * Format: #:~:text=[prefix-,]textStart[,textEnd][,-suffix]
- */
-export function generateTextFragment(selection: Selection): string {
-  if (!selection.rangeCount) {
-    throw new Error("No selection range available");
-  }
-
-  const originalRange = selection.getRangeAt(0);
-
-  // Expand to word boundaries for more stable fragments
-  const range = expandToWordBoundaries(originalRange);
-
-  const selectedText = range.toString().trim();
-  const normalizedText = normalizeText(selectedText);
-
-  if (!normalizedText) {
-    throw new Error("No text selected");
-  }
-
-  const words = normalizedText.split(/\s+/).filter((w) => w.length > 0);
-
-  if (words.length === 0) {
-    throw new Error("No valid words in selection");
-  }
-
-  // Determine strategy
-  const strategy = determineStrategy(normalizedText, range);
-
-  // For single-word selections, use exact match
-  if (words.length === 1) {
-    return generateSimpleFragment(words[0], range);
-  }
-
-  // Use FragmentFactory for iterative expansion
-  const factory = new FragmentFactory(words, range, strategy);
-
-  try {
-    const parts = factory.tryToMakeUniqueFragment();
-    if (parts) {
-      return buildFragmentURL(parts);
-    }
-  } catch (error) {
-    // Timeout or other error - fall back to simple generation
-    console.warn("Fragment generation error:", error);
-  }
-
-  // Fallback: generate without validation
-  return generateFallbackFragment(words, range, strategy);
 }
 
 /**

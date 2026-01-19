@@ -2,6 +2,29 @@
 // Handles clipboard operations with fallback support
 
 /**
+ * Copy text to clipboard using Clipboard API with fallback
+ */
+export async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    // Try modern Clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+
+    // Fallback to execCommand
+    return copyToClipboardFallback(text);
+  } catch (error) {
+    console.warn('Clipboard API failed, trying fallback:', error);
+    return copyToClipboardFallback(text);
+  }
+}
+
+// ============================================================
+// Internal Functions
+// ============================================================
+
+/**
  * Fallback clipboard copy method using execCommand
  */
 function copyToClipboardFallback(text: string): boolean {
@@ -23,24 +46,5 @@ function copyToClipboardFallback(text: string): boolean {
     console.error('Fallback copy failed:', error);
     document.body.removeChild(textarea);
     return false;
-  }
-}
-
-/**
- * Copy text to clipboard using Clipboard API with fallback
- */
-export async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    // Try modern Clipboard API first
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-
-    // Fallback to execCommand
-    return copyToClipboardFallback(text);
-  } catch (error) {
-    console.warn('Clipboard API failed, trying fallback:', error);
-    return copyToClipboardFallback(text);
   }
 }

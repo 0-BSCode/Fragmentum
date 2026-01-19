@@ -3,6 +3,58 @@
 
 import type { SelectionContext } from "@/contracts";
 
+// ============================================================
+// Exported Functions
+// ============================================================
+
+/**
+ * Extract prefix and suffix context around a selection range.
+ * Traverses up to block-level ancestors to capture context from sibling elements.
+ */
+export function extractContext(
+  range: Range,
+  prefixWords: number,
+  suffixWords: number,
+): SelectionContext {
+  const context: SelectionContext = { prefix: "", suffix: "" };
+
+  try {
+    // Find a suitable ancestor that contains enough context
+    const contextAncestor = findContextAncestor(range.startContainer);
+
+    if (contextAncestor) {
+      // Get prefix context - from ancestor start to selection start
+      const prefixRange = document.createRange();
+      prefixRange.setStart(contextAncestor, 0);
+      prefixRange.setEnd(range.startContainer, range.startOffset);
+
+      const prefixText = sanitizeContextText(prefixRange.toString());
+      const prefixWordArray = prefixText.split(/\s+/).filter(isValidContextWord);
+      context.prefix = prefixWordArray.slice(-prefixWords).join(" ");
+
+      // Get suffix context - from selection end to ancestor end
+      const suffixRange = document.createRange();
+      suffixRange.setStart(range.endContainer, range.endOffset);
+      suffixRange.setEnd(
+        contextAncestor,
+        contextAncestor.childNodes.length,
+      );
+
+      const suffixText = sanitizeContextText(suffixRange.toString());
+      const suffixWordArray = suffixText.split(/\s+/).filter(isValidContextWord);
+      context.suffix = suffixWordArray.slice(0, suffixWords).join(" ");
+    }
+  } catch (error) {
+    console.warn("Could not extract context:", error);
+  }
+
+  return context;
+}
+
+// ============================================================
+// Internal Constants
+// ============================================================
+
 /** Block-level elements that serve as good context boundaries */
 const BLOCK_ELEMENTS = [
   "article",
@@ -20,6 +72,10 @@ const BLOCK_ELEMENTS = [
   "section",
   "ul",
 ];
+
+// ============================================================
+// Internal Functions
+// ============================================================
 
 /**
  * Find the nearest block-level ancestor that can provide good context.
@@ -71,48 +127,4 @@ function isValidContextWord(word: string): boolean {
   if (word.length > 50) return false; // Unusually long "words" are likely artifacts
   if (/^[\d\W]+$/.test(word) && word.length > 10) return false; // Long non-word strings
   return true;
-}
-
-/**
- * Extract prefix and suffix context around a selection range.
- * Traverses up to block-level ancestors to capture context from sibling elements.
- */
-export function extractContext(
-  range: Range,
-  prefixWords: number,
-  suffixWords: number,
-): SelectionContext {
-  const context: SelectionContext = { prefix: "", suffix: "" };
-
-  try {
-    // Find a suitable ancestor that contains enough context
-    const contextAncestor = findContextAncestor(range.startContainer);
-
-    if (contextAncestor) {
-      // Get prefix context - from ancestor start to selection start
-      const prefixRange = document.createRange();
-      prefixRange.setStart(contextAncestor, 0);
-      prefixRange.setEnd(range.startContainer, range.startOffset);
-
-      const prefixText = sanitizeContextText(prefixRange.toString());
-      const prefixWordArray = prefixText.split(/\s+/).filter(isValidContextWord);
-      context.prefix = prefixWordArray.slice(-prefixWords).join(" ");
-
-      // Get suffix context - from selection end to ancestor end
-      const suffixRange = document.createRange();
-      suffixRange.setStart(range.endContainer, range.endOffset);
-      suffixRange.setEnd(
-        contextAncestor,
-        contextAncestor.childNodes.length,
-      );
-
-      const suffixText = sanitizeContextText(suffixRange.toString());
-      const suffixWordArray = suffixText.split(/\s+/).filter(isValidContextWord);
-      context.suffix = suffixWordArray.slice(0, suffixWords).join(" ");
-    }
-  } catch (error) {
-    console.warn("Could not extract context:", error);
-  }
-
-  return context;
 }
