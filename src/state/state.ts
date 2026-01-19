@@ -4,9 +4,8 @@
 import type { IAppState, IStateManager } from "@/contracts";
 
 const initialState: IAppState = {
-  floatingButton: null,
+  toastElement: null,
   feedbackTimeout: null,
-  selectionDebounceTimeout: null,
 };
 
 let state: IAppState = { ...initialState };
@@ -23,9 +22,6 @@ export const stateManager: IStateManager = {
   reset(): void {
     if (state.feedbackTimeout) {
       clearTimeout(state.feedbackTimeout);
-    }
-    if (state.selectionDebounceTimeout) {
-      clearTimeout(state.selectionDebounceTimeout);
     }
     state = { ...initialState };
   },

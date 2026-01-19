@@ -2,9 +2,7 @@
 // Re-exports all event-related modules
 
 export {
-  handleSelection,
   handleKeyboardShortcut,
-  handleClickOutside,
   handleFragmentGeneration,
   handleMessage,
 } from "./handlers";

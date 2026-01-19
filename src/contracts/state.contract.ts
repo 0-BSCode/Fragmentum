@@ -2,9 +2,8 @@
 // Defines interfaces for application state management
 
 export interface IAppState {
-  floatingButton: HTMLDivElement | null;
+  toastElement: HTMLDivElement | null;
   feedbackTimeout: ReturnType<typeof setTimeout> | null;
-  selectionDebounceTimeout: ReturnType<typeof setTimeout> | null;
 }
 
 export interface IStateManager {

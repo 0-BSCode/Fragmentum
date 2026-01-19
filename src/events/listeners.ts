@@ -1,34 +1,16 @@
 // Event Listeners
 // Attachment of event listeners to DOM and Chrome APIs
 
-import { getButtonElement } from "@/ui/button";
 import {
-  handleSelection,
   handleKeyboardShortcut,
-  handleClickOutside,
-  handleFragmentGeneration,
   handleMessage,
 } from "./handlers";
 
 /**
- * Attach all document event listeners
+ * Attach keyboard shortcut listener
  */
-function attachDocumentEventListeners(): void {
-  document.addEventListener("mouseup", handleSelection);
-  document.addEventListener("touchend", handleSelection);
+function attachKeyboardListener(): void {
   document.addEventListener("keydown", handleKeyboardShortcut);
-  document.addEventListener("click", handleClickOutside);
-}
-
-/**
- * Attach click handler to the floating button
- * Should be called after button is created
- */
-function attachButtonClickListener(): void {
-  const button = getButtonElement();
-  if (button) {
-    button.addEventListener("click", handleFragmentGeneration);
-  }
 }
 
 /**
@@ -44,7 +26,6 @@ function attachMessageListener(): void {
  * Attach all event listeners
  */
 export function attachEventListeners(): void {
-  attachDocumentEventListeners();
-  attachButtonClickListener();
+  attachKeyboardListener();
   attachMessageListener();
 }

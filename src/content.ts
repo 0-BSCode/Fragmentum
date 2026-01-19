@@ -1,7 +1,7 @@
 // Fragmentum - Text Fragment Generation Content Script
 // Composition root - orchestrates all modules
 
-import { createFloatingButton } from "@/ui/button";
+import { createToast } from "@/ui/toast";
 import { attachEventListeners } from "@/events";
 
 /**
@@ -10,7 +10,7 @@ import { attachEventListeners } from "@/events";
  */
 function init(): void {
   // Create UI components
-  createFloatingButton();
+  createToast();
 
   // Attach the event listeners
   attachEventListeners();

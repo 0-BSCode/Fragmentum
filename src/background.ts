@@ -7,7 +7,7 @@ import { compileFragments } from "@/services/compile.service";
 import type { IHighlight } from "@/contracts";
 
 const CONTEXT_MENU_ID = "fragmentum-generate";
-const CONTEXT_MENU_TITLE = "Fragmentum: Generate fragment";
+const CONTEXT_MENU_TITLE = "Fragmentum: Add link to highlights";
 
 // Create context menu on extension install/update
 chrome.runtime.onInstalled.addListener(() => {
