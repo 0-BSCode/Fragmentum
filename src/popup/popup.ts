@@ -229,11 +229,6 @@ async function handleDelete(e: Event): Promise<void> {
 async function handleClearAll(): Promise<void> {
   if (highlights.length === 0) return;
 
-  // Confirm action
-  // if (!confirm(`Clear all ${highlights.length} highlight${highlights.length !== 1 ? 's' : ''} from this page?`)) {
-  //   return;
-  // }
-
   try {
     await chrome.runtime.sendMessage({
       action: ACTIONS.clearHighlights,

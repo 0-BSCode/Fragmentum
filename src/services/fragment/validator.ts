@@ -6,13 +6,13 @@ import type { FragmentParts } from "@/contracts";
 import { normalizeText } from "./encoder";
 
 // ============================================================
-// Exported Types
+// Internal Types
 // ============================================================
 
 /**
  * Result of validating a fragment against the document
  */
-export interface ValidationResult {
+interface ValidationResult {
   isUnique: boolean;
   matchCount: number;
   matchesSelection: boolean;
@@ -46,7 +46,7 @@ export function validateFragment(
  * Find all matches for a fragment in the current document
  * Implements a simplified version of the text fragment matching algorithm
  */
-export function findFragmentMatches(parts: FragmentParts): FragmentMatch[] {
+function findFragmentMatches(parts: FragmentParts): FragmentMatch[] {
   const matches: FragmentMatch[] = [];
 
   // Get all text content from the document body
@@ -96,8 +96,14 @@ export function findFragmentMatches(parts: FragmentParts): FragmentMatch[] {
     // Validate prefix if present
     if (normalizedPrefix) {
       const prefixEnd = startIndex;
-      const prefixSearchStart = Math.max(0, prefixEnd - normalizedPrefix.length - 50); // Allow some whitespace
-      const textBefore = normalizedFullText.substring(prefixSearchStart, prefixEnd);
+      const prefixSearchStart = Math.max(
+        0,
+        prefixEnd - normalizedPrefix.length - 50,
+      ); // Allow some whitespace
+      const textBefore = normalizedFullText.substring(
+        prefixSearchStart,
+        prefixEnd,
+      );
       if (!textBefore.includes(normalizedPrefix)) {
         searchStart = startIndex + 1;
         continue;
@@ -111,7 +117,10 @@ export function findFragmentMatches(parts: FragmentParts): FragmentMatch[] {
         normalizedFullText.length,
         suffixStart + normalizedSuffix.length + 50,
       );
-      const textAfter = normalizedFullText.substring(suffixStart, suffixSearchEnd);
+      const textAfter = normalizedFullText.substring(
+        suffixStart,
+        suffixSearchEnd,
+      );
       if (!textAfter.includes(normalizedSuffix)) {
         searchStart = startIndex + 1;
         continue;
@@ -135,6 +144,8 @@ export function findFragmentMatches(parts: FragmentParts): FragmentMatch[] {
 
     searchStart = startIndex + 1;
   }
+
+  console.log(matches);
 
   return matches;
 }

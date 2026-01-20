@@ -55,7 +55,7 @@ export function generateTextFragment(selection: Selection): string {
 
   // For single-word selections, use exact match
   if (words.length === 1) {
-    return generateSimpleFragment(words[0], range);
+    return generateSingleWordFragment(words[0], range);
   }
 
   // Use FragmentFactory for iterative expansion
@@ -138,11 +138,12 @@ class FragmentFactory {
     }
 
     // Add context if needed
+    const WORD_COUNT = 3;
     if (this.hasPrefix || this.hasSuffix) {
       const context = extractContext(
         this.range,
-        this.hasPrefix ? 3 : 0,
-        this.hasSuffix ? 3 : 0,
+        this.hasPrefix ? WORD_COUNT : 0,
+        this.hasSuffix ? WORD_COUNT : 0,
       );
       if (this.hasPrefix && context.prefix) {
         parts.prefix = encodeFragmentComponent(context.prefix);
@@ -163,7 +164,7 @@ class FragmentFactory {
    * 3. Add prefix context
    * 4. Add suffix context
    */
-  embiggen(): boolean {
+  expandFragment(): boolean {
     this.checkTimeout();
 
     const maxStartWords = Math.floor(this.words.length / 2);
@@ -208,14 +209,13 @@ class FragmentFactory {
 
       // Validate uniqueness
       const validation = validateFragment(fragment, this.range);
-      console.log(validation);
 
       if (validation.isUnique && validation.matchesSelection) {
         return fragment;
       }
 
       // Try to expand
-      if (!this.embiggen()) {
+      if (!this.expandFragment()) {
         // Cannot expand further, return best effort
         break;
       }
@@ -300,6 +300,9 @@ function isWordBoundaryChar(char: string): boolean {
 function containsBlockBoundary(range: Range): boolean {
   const fragment = range.cloneContents();
 
+  console.log("FRAGMENT");
+  console.log(fragment);
+
   // Check if any block elements exist in the selection
   const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_ELEMENT, {
     acceptNode: (node) => {
@@ -337,7 +340,7 @@ function determineStrategy(
 /**
  * Generate a simple fragment for single-word selections
  */
-function generateSimpleFragment(word: string, range: Range): string {
+function generateSingleWordFragment(word: string, range: Range): string {
   const parts: FragmentParts = {
     textStart: encodeFragmentComponent(word),
   };

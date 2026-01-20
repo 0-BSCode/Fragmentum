@@ -13,8 +13,8 @@ import type { SelectionContext } from "@/contracts";
  */
 export function extractContext(
   range: Range,
-  prefixWords: number,
-  suffixWords: number,
+  prefixWordCount: number,
+  suffixWordCount: number,
 ): SelectionContext {
   const context: SelectionContext = { prefix: "", suffix: "" };
 
@@ -29,20 +29,21 @@ export function extractContext(
       prefixRange.setEnd(range.startContainer, range.startOffset);
 
       const prefixText = sanitizeContextText(prefixRange.toString());
-      const prefixWordArray = prefixText.split(/\s+/).filter(isValidContextWord);
-      context.prefix = prefixWordArray.slice(-prefixWords).join(" ");
+      const prefixWordArray = prefixText
+        .split(/\s+/)
+        .filter(isValidContextWord);
+      context.prefix = prefixWordArray.slice(-prefixWordCount).join(" ");
 
       // Get suffix context - from selection end to ancestor end
       const suffixRange = document.createRange();
       suffixRange.setStart(range.endContainer, range.endOffset);
-      suffixRange.setEnd(
-        contextAncestor,
-        contextAncestor.childNodes.length,
-      );
+      suffixRange.setEnd(contextAncestor, contextAncestor.childNodes.length);
 
       const suffixText = sanitizeContextText(suffixRange.toString());
-      const suffixWordArray = suffixText.split(/\s+/).filter(isValidContextWord);
-      context.suffix = suffixWordArray.slice(0, suffixWords).join(" ");
+      const suffixWordArray = suffixText
+        .split(/\s+/)
+        .filter(isValidContextWord);
+      context.suffix = suffixWordArray.slice(0, suffixWordCount).join(" ");
     }
   } catch (error) {
     console.warn("Could not extract context:", error);
