@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/logo.jpg" alt="Fragmentum" width="120">
+  <img src="public/logo.png" alt="Fragmentum" width="120">
 
   # Fragmentum
 
