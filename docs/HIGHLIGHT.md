@@ -1,4 +1,4 @@
-# Text Fragment Generation: Specification & Implementation Analysis
+# Text Fragment Generation: Specification & Implementation Analysis (DEPRECATED)
 
 This document compares the W3C Text Fragment specification and Chrome's reference implementation against Fragmentum's current implementation, identifying gaps that cause fragment highlighting failures.
 
