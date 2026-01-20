@@ -2,12 +2,11 @@
   "manifest_version": 3,
   "name": "Fragmentum",
   "version": "1.0.0",
-  "description": "Generate URL fragments from text selections, collect highlights, and compile them into shareable links",
+  "description": "Collect text fragment highlights and compile them into shareable links",
   "permissions": [
     "activeTab",
     "clipboardWrite",
-    "storage",
-    "contextMenus"
+    "storage"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -16,14 +15,6 @@
   "background": {
     "service_worker": "scripts/background.iife.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["scripts/content.iife.js"],
-      "css": ["styles/content.css"],
-      "run_at": "document_idle"
-    }
-  ],
   "icons": {
     "16": "public/icon16.png",
     "48": "public/icon48.png",

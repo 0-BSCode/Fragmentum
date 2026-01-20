@@ -16,6 +16,16 @@
     </header>
 
     <main class="popup-main">
+      <section class="input-section">
+        <input type="text" id="url-input" class="url-input" placeholder="Paste link to highlight..." />
+        <button id="add-btn" class="btn btn-add">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+          Add
+        </button>
+      </section>
+
       <div class="highlights-list" id="highlights-list">
         <!-- Populated by JavaScript -->
       </div>
@@ -26,7 +36,7 @@
           <path d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.102 1.101"></path>
         </svg>
         <p class="empty-title">No highlights on this page</p>
-        <p class="empty-hint">Select text and click the Fragmentum button to add highlights.</p>
+        <p class="empty-hint">Use browser's "Copy link to highlight" and paste above.</p>
       </div>
 
       <div class="loading-state" id="loading-state">

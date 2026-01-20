@@ -87,6 +87,45 @@ body {
   max-height: 320px;
 }
 
+/* Input Section */
+.input-section {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.url-input {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.url-input::placeholder {
+  color: var(--text-muted);
+}
+
+.url-input:focus {
+  border-color: var(--accent-primary);
+  background: var(--bg-tertiary);
+}
+
+.btn-add {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: var(--accent-primary);
+  color: #1a1a1a;
+}
+
+.btn-add:hover:not(:disabled) {
+  background: #E5C85A;
+}
+
 /* Highlights List */
 .highlights-list {
   display: flex;
@@ -352,7 +391,8 @@ body {
 /* Focus styles */
 .btn:focus-visible,
 .goto-btn:focus-visible,
-.delete-btn:focus-visible {
+.delete-btn:focus-visible,
+.url-input:focus-visible {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }

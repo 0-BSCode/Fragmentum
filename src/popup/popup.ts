@@ -1,8 +1,12 @@
 // Fragmentum Popup
 // Displays highlight collection and compile functionality
+// Supports manual input of "Copy link to highlight" URLs
 
 import { ACTIONS } from "@/constants";
 import type { IHighlight } from "@/contracts";
+
+// Constants
+const MAX_DISPLAY_TEXT_LENGTH = 100;
 
 // DOM Elements
 let highlightsList: HTMLElement;
@@ -11,6 +15,8 @@ let loadingState: HTMLElement;
 let highlightCount: HTMLElement;
 let compileBtn: HTMLButtonElement;
 let clearBtn: HTMLButtonElement;
+let urlInput: HTMLInputElement;
+let addBtn: HTMLButtonElement;
 let toast: HTMLElement;
 let toastMessage: HTMLElement;
 
@@ -31,12 +37,18 @@ async function init(): Promise<void> {
   highlightCount = document.getElementById("highlight-count")!;
   compileBtn = document.getElementById("compile-btn") as HTMLButtonElement;
   clearBtn = document.getElementById("clear-btn") as HTMLButtonElement;
+  urlInput = document.getElementById("url-input") as HTMLInputElement;
+  addBtn = document.getElementById("add-btn") as HTMLButtonElement;
   toast = document.getElementById("toast")!;
   toastMessage = document.getElementById("toast-message")!;
 
   // Attach event listeners
   compileBtn.addEventListener("click", handleCompile);
   clearBtn.addEventListener("click", handleClearAll);
+  addBtn.addEventListener("click", handleAddHighlight);
+  urlInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleAddHighlight();
+  });
 
   // Show loading state
   showLoading();
@@ -242,6 +254,110 @@ async function handleClearAll(): Promise<void> {
     console.error("Clear error:", error);
     showToast("Failed to clear highlights", "error");
   }
+}
+
+/**
+ * Handle add highlight from pasted URL
+ */
+async function handleAddHighlight(): Promise<void> {
+  const url = urlInput.value.trim();
+
+  if (!url) {
+    showToast("Please paste a link to highlight", "error");
+    return;
+  }
+
+  // Parse the fragment URL
+  const parsed = parseFragmentUrl(url);
+
+  if (!parsed) {
+    showToast("Invalid link format. Use 'Copy link to highlight'", "error");
+    return;
+  }
+
+  // Validate URL matches current page
+  if (parsed.pageUrl !== currentPageUrl) {
+    showToast("Link must be for this page", "error");
+    return;
+  }
+
+  try {
+    // Create highlight object
+    const highlight: IHighlight = {
+      id: generateUUID(),
+      pageUrl: parsed.pageUrl,
+      fragment: parsed.fragment,
+      selectedText: parsed.selectedText.substring(0, MAX_DISPLAY_TEXT_LENGTH),
+      timestamp: Date.now(),
+    };
+
+    // Save to storage via background
+    await chrome.runtime.sendMessage({
+      action: ACTIONS.highlightAdded,
+      data: highlight,
+    });
+
+    // Clear input and reload highlights
+    urlInput.value = "";
+    await loadHighlights();
+    showToast("Highlight added!", "success");
+  } catch (error) {
+    console.error("Add highlight error:", error);
+    showToast("Failed to add highlight", "error");
+  }
+}
+
+/**
+ * Parse a "Copy link to highlight" URL
+ * Returns parsed components or null if invalid
+ */
+interface ParsedFragment {
+  pageUrl: string;
+  fragment: string;
+  selectedText: string;
+}
+
+function parseFragmentUrl(url: string): ParsedFragment | null {
+  // Check for text fragment marker
+  const fragmentIndex = url.indexOf("#:~:text=");
+  if (fragmentIndex === -1) return null;
+
+  // Extract base URL (without fragment)
+  const pageUrl = url.substring(0, fragmentIndex);
+
+  // Extract fragment (everything after #:~:)
+  const fragment = url.substring(fragmentIndex + 4); // Skip "#:~:"
+
+  // Validate fragment starts with text=
+  if (!fragment.startsWith("text=")) return null;
+
+  // Extract the text portion for display
+  const textMatch = fragment.match(/text=([^&]+)/);
+  if (!textMatch) return null;
+
+  // Decode the text portion for display
+  // Handle prefix-,text,end,-suffix format
+  let selectedText: string;
+  try {
+    selectedText = decodeURIComponent(textMatch[1]);
+    // Clean up prefix/suffix markers for display
+    selectedText = selectedText
+      .replace(/^[^,]*-,/, "") // Remove prefix-,
+      .replace(/,-[^,]*$/, "") // Remove ,-suffix
+      .replace(/,/g, " ... "); // Range separator to ellipsis
+  } catch {
+    // If decoding fails, use raw text
+    selectedText = textMatch[1];
+  }
+
+  return { pageUrl, fragment, selectedText };
+}
+
+/**
+ * Generate a UUID for highlight IDs
+ */
+function generateUUID(): string {
+  return crypto.randomUUID();
 }
 
 /**
