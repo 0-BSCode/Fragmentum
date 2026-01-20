@@ -145,8 +145,6 @@ function findFragmentMatches(parts: FragmentParts): FragmentMatch[] {
     searchStart = startIndex + 1;
   }
 
-  console.log(matches);
-
   return matches;
 }
 

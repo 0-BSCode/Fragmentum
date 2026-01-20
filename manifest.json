@@ -1,9 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Fragmentum",
-  "version": "2.1.0",
+  "version": "1.0.0",
   "description": "Generate URL fragments from text selections, collect highlights, and compile them into shareable links",
-  "permissions": ["activeTab", "scripting", "clipboardWrite", "storage", "contextMenus"],
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "storage",
+    "contextMenus"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Fragmentum - View Highlights"

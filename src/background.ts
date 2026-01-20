@@ -20,6 +20,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 // Handle context menu click
 chrome.contextMenus.onClicked.addListener((info, tab) => {
+  console.log(info);
   if (info.menuItemId === CONTEXT_MENU_ID && tab?.id) {
     // Send message to content script, handling cases where it may not be loaded
     chrome.tabs

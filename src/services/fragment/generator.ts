@@ -300,7 +300,7 @@ function isWordBoundaryChar(char: string): boolean {
 function containsBlockBoundary(range: Range): boolean {
   const fragment = range.cloneContents();
 
-  console.log("FRAGMENT");
+  console.log("Fragment");
   console.log(fragment);
 
   // Check if any block elements exist in the selection

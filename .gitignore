@@ -5,3 +5,5 @@ dist
 
 scripts
 .playwright-mcp
+
+*.zip
