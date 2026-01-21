@@ -65,11 +65,112 @@ body {
     align-items: center;
 }
 
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .logo {
     font-size: 18px;
     font-weight: 600;
     color: var(--text-primary);
     letter-spacing: -0.5px;
+}
+
+/* Help Icon and Tooltip */
+.help-icon-wrapper {
+    position: relative;
+}
+
+.help-icon {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.help-icon:hover {
+    color: var(--accent-primary);
+}
+
+.help-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.help-tooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    padding: 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 100;
+}
+
+.help-icon-wrapper:hover .help-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.help-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid var(--border-color);
+}
+
+.help-tooltip::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid var(--bg-tertiary);
+}
+
+.help-tooltip-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.help-tooltip-steps {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding-left: 20px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.help-tooltip-steps li {
+    margin-bottom: 6px;
+}
+
+.help-tooltip-steps li:last-child {
+    margin-bottom: 0;
 }
 
 .highlight-count {
@@ -398,7 +499,8 @@ body {
 .delete-btn:focus-visible,
 .url-input:focus-visible,
 .menu-btn:focus-visible,
-.menu-item:focus-visible {
+.menu-item:focus-visible,
+.help-icon:focus-visible {
     outline: 2px solid var(--accent-primary);
     outline-offset: 2px;
 }
