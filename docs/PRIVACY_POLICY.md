@@ -1,7 +1,7 @@
 # Privacy Policy for Fragmentum
 
-**Effective Date:** January 2025
-**Last Updated:** January 2025
+**Effective Date:** January 2026
+**Last Updated:** January 2026
 
 ## Overview
 
