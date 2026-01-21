@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/logo.png" alt="Fragmentum" width="120">
+  <img src="docs/assets/logo.png" alt="Fragmentum" width="120">
 
   # Fragmentum
 
@@ -19,7 +19,7 @@ Fragmentum is a Chrome extension that helps you collect multiple text highlights
 Built on the [W3C Text Fragments](https://wicg.github.io/scroll-to-text-fragment/) standard (`#:~:text=...`).
 
 <div align="center">
-  <img src="public/demo.gif" alt="Fragmentum Demo" width="700">
+  <img src="docs/assets/demo.gif" alt="Fragmentum Demo" width="700">
 </div>
 
 ## Features
@@ -62,7 +62,7 @@ Built on the [W3C Text Fragments](https://wicg.github.io/scroll-to-text-fragment
 | 6 | Click **Compile & Copy** to get your shareable URL |
 
 <div align="center">
-  <img src="public/popup.png" alt="Fragmentum Popup" width="350">
+  <img src="docs/assets/popup.png" alt="Fragmentum Popup" width="350">
 </div>
 
 ## Development
