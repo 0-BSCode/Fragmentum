@@ -4,3 +4,5 @@
 export * from './fragment';
 export * from './clipboard';
 export * from './selection';
+export * from './fragment-parser';
+export * from './highlight';

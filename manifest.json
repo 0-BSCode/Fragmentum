@@ -3,11 +3,7 @@
   "name": "Fragmentum",
   "version": "1.0.0",
   "description": "Collect text fragment highlights and compile them into shareable links",
-  "permissions": [
-    "activeTab",
-    "clipboardWrite",
-    "storage"
-  ],
+  "permissions": ["activeTab", "clipboardWrite", "storage"],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Fragmentum - View Highlights"
