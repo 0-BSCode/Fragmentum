@@ -12,6 +12,7 @@ export const storageService = {
   getHighlightsForPage,
   removeHighlight,
   clearHighlightsForPage,
+  clearAllHighlights,
   getAllHighlights,
 };
 
@@ -92,4 +93,17 @@ async function clearHighlightsForPage(pageUrl: string): Promise<void> {
     delete highlights[pageUrl];
     await saveHighlights(highlights);
   }
+}
+
+/**
+ * Clear all highlights globally (all pages)
+ */
+async function clearAllHighlights(): Promise<number> {
+  const highlights = await getAllHighlights();
+  const totalCount = Object.values(highlights).reduce(
+    (sum, arr) => sum + arr.length,
+    0
+  );
+  await saveHighlights({});
+  return totalCount;
 }

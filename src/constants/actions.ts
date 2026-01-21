@@ -5,5 +5,6 @@ export const ACTIONS = {
   getHighlights: "getHighlights",
   removeHighlight: "removeHighlight",
   clearHighlights: "clearHighlights",
+  clearAllHighlightsGlobal: "clearAllHighlightsGlobal",
   compileHighlights: "compileHighlights",
 } as const;
