@@ -7,6 +7,7 @@ import { generateUUID } from "@/services/compile.service";
 import { parseFragmentUrl } from "@/services/fragment-parser";
 import {
   addHighlight,
+  clearAllHighlightsGlobal,
   clearHighlights,
   compileHighlights,
   loadHighlights,
@@ -46,6 +47,14 @@ async function init(): Promise<void> {
   state.elements.urlInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") handleAddHighlight();
   });
+
+  // Menu event listeners
+  state.elements.menuBtn.addEventListener("click", toggleMenu);
+  state.elements.clearAllGlobalBtn.addEventListener(
+    "click",
+    handleClearAllGlobal
+  );
+  document.addEventListener("click", handleClickOutside);
 
   showLoading(state.elements);
 
@@ -185,8 +194,6 @@ async function handleAddHighlight(): Promise<void> {
     );
     return;
   }
-  console.log("Parsed URL: ", parsed);
-  console.log("State: ", state);
 
   if (parsed.pageUrl !== state.currentPageUrl) {
     showToast(state.elements, "Link must be for this page", "error");
@@ -209,6 +216,48 @@ async function handleAddHighlight(): Promise<void> {
   } catch (error) {
     console.error("Add highlight error:", error);
     showToast(state.elements, "Failed to add highlight", "error");
+  }
+}
+
+/**
+ * Toggle menu dropdown visibility
+ */
+function toggleMenu(e: Event): void {
+  e.stopPropagation();
+  state.elements.menuDropdown.classList.toggle("visible");
+}
+
+/**
+ * Close menu when clicking outside
+ */
+function handleClickOutside(e: Event): void {
+  const target = e.target as HTMLElement;
+  if (
+    !state.elements.menuBtn.contains(target) &&
+    !state.elements.menuDropdown.contains(target)
+  ) {
+    state.elements.menuDropdown.classList.remove("visible");
+  }
+}
+
+/**
+ * Handle clear all highlights globally
+ */
+async function handleClearAllGlobal(): Promise<void> {
+  state.elements.menuDropdown.classList.remove("visible");
+
+  try {
+    const count = await clearAllHighlightsGlobal();
+    state.highlights = [];
+    renderHighlights();
+    showToast(
+      state.elements,
+      `Cleared ${count} highlight${count !== 1 ? "s" : ""} from all pages`,
+      "success"
+    );
+  } catch (error) {
+    console.error("Clear all global error:", error);
+    showToast(state.elements, "Failed to clear all highlights", "error");
   }
 }
 

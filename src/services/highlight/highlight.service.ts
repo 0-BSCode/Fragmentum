@@ -50,6 +50,17 @@ export async function clearHighlights(pageUrl: string): Promise<void> {
 }
 
 /**
+ * Clear all highlights globally (all pages)
+ * Returns the count of deleted highlights
+ */
+export async function clearAllHighlightsGlobal(): Promise<number> {
+  const response = await chrome.runtime.sendMessage({
+    action: ACTIONS.clearAllHighlightsGlobal,
+  });
+  return response.count ?? 0;
+}
+
+/**
  * Compile highlights into a single URL
  * Returns the compiled URL and count
  */

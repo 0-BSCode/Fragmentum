@@ -17,6 +17,9 @@ export interface PopupElements {
   addBtn: HTMLButtonElement;
   toast: HTMLElement;
   toastMessage: HTMLElement;
+  menuBtn: HTMLButtonElement;
+  menuDropdown: HTMLElement;
+  clearAllGlobalBtn: HTMLButtonElement;
 }
 
 /**
@@ -44,6 +47,11 @@ export function initializeElements(): PopupElements {
     addBtn: document.getElementById("add-btn") as HTMLButtonElement,
     toast: document.getElementById("toast")!,
     toastMessage: document.getElementById("toast-message")!,
+    menuBtn: document.getElementById("menu-btn") as HTMLButtonElement,
+    menuDropdown: document.getElementById("menu-dropdown")!,
+    clearAllGlobalBtn: document.getElementById(
+      "clear-all-global-btn"
+    ) as HTMLButtonElement,
   };
 }
 

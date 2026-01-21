@@ -49,6 +49,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         );
       return true; // Async response
 
+    case ACTIONS.clearAllHighlightsGlobal:
+      // Clear all highlights globally (all pages)
+      storageService
+        .clearAllHighlights()
+        .then((count) => sendResponse({ success: true, count }))
+        .catch((error) =>
+          sendResponse({ success: false, count: 0, error: String(error) }),
+        );
+      return true; // Async response
+
     case ACTIONS.compileHighlights:
       // Compile highlights into single URL
       storageService

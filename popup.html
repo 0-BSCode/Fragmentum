@@ -1,70 +1,139 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fragmentum</title>
-  <link rel="stylesheet" href="styles/popup.css">
-</head>
-<body>
-  <div class="popup-container">
-    <header class="popup-header">
-      <div class="header-content">
-        <h1 class="logo">Fragmentum</h1>
-        <span class="highlight-count" id="highlight-count">0 highlights</span>
-      </div>
-    </header>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Fragmentum</title>
+        <link rel="stylesheet" href="styles/popup.css" />
+    </head>
+    <body>
+        <div class="popup-container">
+            <header class="popup-header">
+                <div class="header-content">
+                    <h1 class="logo">Fragmentum</h1>
+                    <span class="highlight-count" id="highlight-count"
+                        >0 highlights</span
+                    >
+                </div>
+            </header>
 
-    <main class="popup-main">
-      <section class="input-section">
-        <input type="text" id="url-input" class="url-input" placeholder="Paste link to highlight..." />
-        <button id="add-btn" class="btn btn-add">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>
-          Add
-        </button>
-      </section>
+            <main class="popup-main">
+                <section class="input-section">
+                    <input
+                        type="text"
+                        id="url-input"
+                        class="url-input"
+                        placeholder="Paste link to highlight..."
+                    />
+                    <button id="add-btn" class="btn btn-add">
+                        <svg
+                            class="btn-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M12 5v14M5 12h14"></path>
+                        </svg>
+                        Add
+                    </button>
+                </section>
 
-      <div class="highlights-list" id="highlights-list">
-        <!-- Populated by JavaScript -->
-      </div>
+                <div class="highlights-list" id="highlights-list">
+                    <!-- Populated by JavaScript -->
+                </div>
 
-      <div class="empty-state" id="empty-state">
-        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"></path>
-          <path d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.102 1.101"></path>
-        </svg>
-        <p class="empty-title">No highlights on this page</p>
-        <p class="empty-hint">Use browser's "Copy link to highlight" and paste above.</p>
-      </div>
+                <div class="empty-state" id="empty-state">
+                    <svg
+                        class="empty-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"
+                        ></path>
+                        <path
+                            d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.102 1.101"
+                        ></path>
+                    </svg>
+                    <p class="empty-title">No highlights on this page</p>
+                    <p class="empty-hint">
+                        Use browser's "Copy link to highlight" and paste above.
+                    </p>
+                </div>
 
-      <div class="loading-state" id="loading-state">
-        <div class="spinner"></div>
-        <p>Loading highlights...</p>
-      </div>
-    </main>
+                <div class="loading-state" id="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading highlights...</p>
+                </div>
+            </main>
 
-    <footer class="popup-footer">
-      <button id="compile-btn" class="btn btn-primary" disabled>
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-        </svg>
-        Compile & Copy
-      </button>
-      <button id="clear-btn" class="btn btn-secondary" disabled>
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-        </svg>
-        Clear All
-      </button>
-    </footer>
-  </div>
+            <footer class="popup-footer">
+                <button id="compile-btn" class="btn btn-primary" disabled>
+                    <svg
+                        class="btn-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                        ></path>
+                    </svg>
+                    Compile & Copy
+                </button>
+                <button id="clear-btn" class="btn btn-secondary" disabled>
+                    <svg
+                        class="btn-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        ></path>
+                    </svg>
+                    Clear All
+                </button>
+                <div class="menu-container">
+                    <button id="menu-btn" class="menu-btn" title="More options">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="5" r="2"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <circle cx="12" cy="19" r="2"></circle>
+                        </svg>
+                    </button>
+                    <div class="menu-dropdown" id="menu-dropdown">
+                        <button
+                            id="clear-all-global-btn"
+                            class="menu-item menu-item-danger"
+                        >
+                            <svg
+                                class="menu-item-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                ></path>
+                            </svg>
+                            Clear highlights globally
+                        </button>
+                    </div>
+                </div>
+            </footer>
+        </div>
 
-  <div class="toast" id="toast">
-    <span class="toast-message" id="toast-message"></span>
-  </div>
+        <div class="toast" id="toast">
+            <span class="toast-message" id="toast-message"></span>
+        </div>
 
-  <script src="scripts/popup.iife.js"></script>
-</body>
+        <script src="scripts/popup.iife.js"></script>
+    </body>
 </html>
